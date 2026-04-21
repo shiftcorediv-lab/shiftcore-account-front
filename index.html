@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShiftCore Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 420px;
+      margin: 80px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: 24px;
+      text-align: center;
+    }
+
+    p {
+      font-size: 14px;
+      color: #444;
+      line-height: 1.6;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 16px;
+    }
+
+    #loginBtn {
+      background: #111;
+      color: #fff;
+    }
+
+    #logoutBtn {
+      background: #ddd;
+      color: #111;
+      display: none;
+    }
+
+    .status-box {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f0f0f0;
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ShiftCore</h1>
+    <p>Googleアカウントでログインしてください。</p>
+
+    <button id="loginBtn">Googleでログイン</button>
+    <button id="logoutBtn">ログアウト</button>
+
+    <div id="statusBox" class="status-box">未ログイン</div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAXDhMT1IP1xQ9f0WiOIjmmfBHoQDWZ0dI",
+      authDomain: "shiftcore-div.firebaseapp.com",
+      projectId: "shiftcore-div",
+      storageBucket: "shiftcore-div.firebasestorage.app",
+      messagingSenderId: "882342275588",
+      appId: "1:882342275588:web:bab610608d1bc00453e351"
+    };
+
+    const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxoWeQnL4cuF-hYVMuLpYDMJ8e1ip_x1WpQfAW4HInzbX_RGYAZ5L7iiS5RDEm6TG8shA/exec";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const statusBox = document.getElementById("statusBox");
+
+    function setStatus(message) {
+      statusBox.textContent = message;
+    }
+
+    async function checkUserWithGas(email) {
+      const response = await fetch(GAS_WEBAPP_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify({ email })
+      });
+
+      const result = await response.json();
+      return result;
+    }
+
+    loginBtn.addEventListener("click", async () => {
+      try {
+        setStatus("Googleログイン中...");
+
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        if (!user || !user.email) {
+          setStatus("メールアドレスが取得できませんでした");
+          return;
+        }
+
+        setStatus("アカウント照合中...");
+
+        const loginCheck = await checkUserWithGas(user.email);
+
+        if (loginCheck.ok) {
+          loginBtn.style.display = "none";
+          logoutBtn.style.display = "block";
+
+          setStatus(
+            "ログイン成功\n\n" +
+            "名前: " + loginCheck.user.name + "\n" +
+            "メール: " + loginCheck.user.email + "\n" +
+            "ロール: " + loginCheck.user.role + "\n" +
+            "利用可能モジュール: " + loginCheck.user.allowed_modules.join(", ")
+          );
+        } else {
+          setStatus(
+            "ログイン不可\n\n" +
+            "code: " + loginCheck.code + "\n" +
+            "message: " + loginCheck.message
+          );
+
+          await signOut(auth);
+        }
+
+      } catch (error) {
+        setStatus("エラー\n\n" + error.message);
+      }
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        setStatus("ログアウトしました");
+      } catch (error) {
+        setStatus("ログアウトエラー\n\n" + error.message);
+      }
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        loginBtn.style.display = "block";
+        logoutBtn.style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>

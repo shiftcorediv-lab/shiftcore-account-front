@@ -160,7 +160,7 @@
     };
 
     const LOGIN_PAGE_URL = "./index.html";
-    const PMO_URL = "ここにPMOのURLを入れる";
+    const PMO_URL = "https://pickmyoff.another-inc.workers.dev?v=1";
     // ===== 設定ここまで =====
 
     const app = initializeApp(firebaseConfig);
@@ -234,7 +234,7 @@
 
         const button = document.createElement("button");
 
-        if (moduleCode === "https://pickmyoff.another-inc.workers.dev?v=1") {
+        if (moduleCode === "pmo") {
           button.textContent = "開く";
           button.addEventListener("click", () => openModule(moduleCode));
         } else {

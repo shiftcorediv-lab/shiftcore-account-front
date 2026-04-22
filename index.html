@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ShiftCore Login</title>
   <style>
+    /* ===== 全体ここから ===== */
     body {
       font-family: Arial, sans-serif;
       background: #f7f7f7;
@@ -48,12 +49,6 @@
       color: #fff;
     }
 
-    #logoutBtn {
-      background: #ddd;
-      color: #111;
-      display: none;
-    }
-
     .status-box {
       margin-top: 20px;
       padding: 12px;
@@ -63,6 +58,7 @@
       white-space: pre-wrap;
       word-break: break-word;
     }
+    /* ===== 全体ここまで ===== */
   </style>
 </head>
 <body>
@@ -71,7 +67,6 @@
     <p>Googleアカウントでログインしてください。</p>
 
     <button id="loginBtn">Googleでログイン</button>
-    <button id="logoutBtn">ログアウト</button>
 
     <div id="statusBox" class="status-box">ログイン状態を確認中...</div>
   </div>
@@ -99,6 +94,7 @@
     };
 
     const LOGIN_CHECK_URL = "https://shiftcore-login-proxy.shiftcore-div.workers.dev/";
+    const DASHBOARD_URL = "./dashboard.html";
     // ===== 設定ここまで =====
 
     // ===== 初期化ここから =====
@@ -107,34 +103,29 @@
     const provider = new GoogleAuthProvider();
 
     const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
     const statusBox = document.getElementById("statusBox");
     // ===== 初期化ここまで =====
 
-    // ===== 共通表示ここから =====
+    // ===== 表示制御ここから =====
     function setStatus(message) {
       statusBox.textContent = message;
     }
 
     function showLoggedOutState(message = "未ログイン") {
       loginBtn.style.display = "block";
-      logoutBtn.style.display = "none";
       setStatus(message);
     }
+    // ===== 表示制御ここまで =====
 
-    function showLoggedInState(loginCheck) {
-      loginBtn.style.display = "none";
-      logoutBtn.style.display = "block";
-
-      setStatus(
-        "ログイン成功\n\n" +
-        "名前: " + loginCheck.user.name + "\n" +
-        "メール: " + loginCheck.user.email + "\n" +
-        "ロール: " + loginCheck.user.role + "\n" +
-        "利用可能モジュール: " + loginCheck.user.allowed_modules.join(", ")
-      );
+    // ===== セッション保存ここから =====
+    function saveLoginSession(loginCheck) {
+      sessionStorage.setItem("shiftcore_user", JSON.stringify(loginCheck.user));
     }
-    // ===== 共通表示ここまで =====
+
+    function clearLoginSession() {
+      sessionStorage.removeItem("shiftcore_user");
+    }
+    // ===== セッション保存ここまで =====
 
     // ===== GAS照合ここから =====
     async function checkUserWithGas(email) {
@@ -151,9 +142,10 @@
     }
     // ===== GAS照合ここまで =====
 
-    // ===== ログインユーザー照合ここから =====
+    // ===== ログイン済みユーザー確認ここから =====
     async function verifySignedInUser(user) {
       if (!user || !user.email) {
+        clearLoginSession();
         showLoggedOutState("未ログイン");
         return;
       }
@@ -164,24 +156,28 @@
         const loginCheck = await checkUserWithGas(user.email);
 
         if (loginCheck.ok) {
-          showLoggedInState(loginCheck);
-        } else {
-          await signOut(auth);
-          showLoggedOutState(
-            "ログイン不可\n\n" +
-            "code: " + loginCheck.code + "\n" +
-            "message: " + loginCheck.message
-          );
+          saveLoginSession(loginCheck);
+          window.location.href = DASHBOARD_URL;
+          return;
         }
+
+        clearLoginSession();
+        await signOut(auth);
+        showLoggedOutState(
+          "ログイン不可\n\n" +
+          "code: " + loginCheck.code + "\n" +
+          "message: " + loginCheck.message
+        );
       } catch (error) {
+        clearLoginSession();
         showLoggedOutState("エラー\n\n" + error.message);
       }
     }
-    // ===== ログインユーザー照合ここまで =====
+    // ===== ログイン済みユーザー確認ここまで =====
 
-    // ===== 初期永続化設定ここから =====
+    // ===== 永続化設定ここから =====
     await setPersistence(auth, browserLocalPersistence);
-    // ===== 初期永続化設定ここまで =====
+    // ===== 永続化設定ここまで =====
 
     // ===== ログイン処理ここから =====
     loginBtn.addEventListener("click", async () => {
@@ -198,22 +194,12 @@
     });
     // ===== ログイン処理ここまで =====
 
-    // ===== ログアウト処理ここから =====
-    logoutBtn.addEventListener("click", async () => {
-      try {
-        await signOut(auth);
-        showLoggedOutState("ログアウトしました");
-      } catch (error) {
-        setStatus("ログアウトエラー\n\n" + error.message);
-      }
-    });
-    // ===== ログアウト処理ここまで =====
-
     // ===== 認証状態監視ここから =====
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         await verifySignedInUser(user);
       } else {
+        clearLoginSession();
         showLoggedOutState("未ログイン");
       }
     });

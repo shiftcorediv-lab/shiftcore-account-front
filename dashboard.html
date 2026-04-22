@@ -198,13 +198,18 @@
     }
 
     function openModule(moduleCode) {
-      if (moduleCode === "pmo") {
-        window.location.href = PMO_URL;
-        return;
-      }
+  if (moduleCode === "pmo") {
+    const targetUrl = new URL(PMO_URL);
+    targetUrl.searchParams.set("from", "shiftcore");
+    targetUrl.searchParams.set("module", "pmo");
+    targetUrl.searchParams.set("v", "1");
 
-      setStatus("このモジュールはまだ接続されていません: " + moduleCode);
-    }
+    window.location.href = targetUrl.toString();
+    return;
+  }
+
+  setStatus("このモジュールはまだ接続されていません: " + moduleCode);
+}
 
     function renderModules(modules) {
       moduleList.innerHTML = "";

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShiftCore Dashboard</title>
+  <style>
+    /* ===== 全体ここから ===== */
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 40px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 20px;
+      font-size: 28px;
+    }
+
+    h2 {
+      margin-top: 28px;
+      font-size: 20px;
+    }
+
+    .info-box,
+    .module-box {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 10px;
+      background: #f3f3f3;
+    }
+
+    .module-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .module-card {
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .module-card-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .module-card-code {
+      font-size: 13px;
+      color: #555;
+      word-break: break-word;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 12px 18px;
+      font-size: 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #logoutBtn {
+      background: #111;
+      color: #fff;
+    }
+
+    #backToLoginBtn {
+      background: #ddd;
+      color: #111;
+    }
+
+    .status-box {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f0f0f0;
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    /* ===== 全体ここまで ===== */
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ShiftCore Dashboard</h1>
+
+    <div class="info-box">
+      <div><strong>名前：</strong><span id="nameText"></span></div>
+      <div><strong>メール：</strong><span id="emailText"></span></div>
+      <div><strong>ロール：</strong><span id="roleText"></span></div>
+      <div><strong>組織：</strong><span id="organizationText"></span></div>
+    </div>
+
+    <h2>利用可能モジュール</h2>
+    <div id="moduleList" class="module-list"></div>
+
+    <div class="button-row">
+      <button id="logoutBtn">ログアウト</button>
+      <button id="backToLoginBtn">ログイン画面へ戻る</button>
+    </div>
+
+    <div id="statusBox" class="status-box">ダッシュボードを読み込みました</div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import {
+      getAuth,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+    // ===== 設定ここから =====
+    const firebaseConfig = {
+      apiKey: "AIzaSyAXDhMT1IP1xQ9f0WiOIjmmfBHoQDWZ0dI",
+      authDomain: "shiftcore-div.firebaseapp.com",
+      projectId: "shiftcore-div",
+      storageBucket: "shiftcore-div.firebasestorage.app",
+      messagingSenderId: "882342275588",
+      appId: "1:882342275588:web:bab610608d1bc00453e351"
+    };
+
+    const LOGIN_PAGE_URL = "./index.html";
+    // ===== 設定ここまで =====
+
+    // ===== 初期化ここから =====
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const nameText = document.getElementById("nameText");
+    const emailText = document.getElementById("emailText");
+    const roleText = document.getElementById("roleText");
+    const organizationText = document.getElementById("organizationText");
+    const moduleList = document.getElementById("moduleList");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const backToLoginBtn = document.getElementById("backToLoginBtn");
+    const statusBox = document.getElementById("statusBox");
+    // ===== 初期化ここまで =====
+
+    // ===== 表示制御ここから =====
+    function setStatus(message) {
+      statusBox.textContent = message;
+    }
+
+    function goToLogin() {
+      window.location.href = LOGIN_PAGE_URL;
+    }
+    // ===== 表示制御ここまで =====
+
+    // ===== セッション読取ここから =====
+    function getStoredUser() {
+      const raw = sessionStorage.getItem("shiftcore_user");
+
+      if (!raw) {
+        return null;
+      }
+
+      try {
+        return JSON.parse(raw);
+      } catch (error) {
+        return null;
+      }
+    }
+    // ===== セッション読取ここまで =====
+
+    // ===== モジュール表示ここから =====
+    function renderModules(modules) {
+      moduleList.innerHTML = "";
+
+      if (!Array.isArray(modules) || modules.length === 0) {
+        moduleList.innerHTML = "<div class='module-card'><div class='module-card-title'>利用可能モジュールなし</div></div>";
+        return;
+      }
+
+      const moduleNameMap = {
+        account: "アカウント基盤",
+        pmo: "希望休回収 / PMO",
+        shift: "シフト作成 / 公開"
+      };
+
+      modules.forEach(moduleCode => {
+        const card = document.createElement("div");
+        card.className = "module-card";
+
+        const title = document.createElement("div");
+        title.className = "module-card-title";
+        title.textContent = moduleNameMap[moduleCode] || moduleCode;
+
+        const code = document.createElement("div");
+        code.className = "module-card-code";
+        code.textContent = "module_code: " + moduleCode;
+
+        card.appendChild(title);
+        card.appendChild(code);
+        moduleList.appendChild(card);
+      });
+    }
+    // ===== モジュール表示ここまで =====
+
+    // ===== ユーザー表示ここから =====
+    function renderUser(user) {
+      nameText.textContent = user.name || "";
+      emailText.textContent = user.email || "";
+      roleText.textContent = user.role || "";
+      organizationText.textContent = user.organization_id || "";
+
+      renderModules(user.allowed_modules || []);
+    }
+    // ===== ユーザー表示ここまで =====
+
+    // ===== 初期表示ここから =====
+    const storedUser = getStoredUser();
+
+    if (!storedUser) {
+      setStatus("セッション情報がありません。ログイン画面へ戻ります。");
+      setTimeout(goToLogin, 800);
+    } else {
+      renderUser(storedUser);
+      setStatus("ログイン済みユーザー情報を表示中");
+    }
+    // ===== 初期表示ここまで =====
+
+    // ===== 認証状態監視ここから =====
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        sessionStorage.removeItem("shiftcore_user");
+        setStatus("ログイン状態が失われました。ログイン画面へ戻ります。");
+        setTimeout(goToLogin, 800);
+      }
+    });
+    // ===== 認証状態監視ここまで =====
+
+    // ===== ログアウト処理ここから =====
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        sessionStorage.removeItem("shiftcore_user");
+        goToLogin();
+      } catch (error) {
+        setStatus("ログアウトエラー\n\n" + error.message);
+      }
+    });
+
+    backToLoginBtn.addEventListener("click", () => {
+      goToLogin();
+    });
+    // ===== ログアウト処理ここまで =====
+  </script>
+</body>
+</html>

@@ -73,7 +73,7 @@
     <button id="loginBtn">Googleでログイン</button>
     <button id="logoutBtn">ログアウト</button>
 
-    <div id="statusBox" class="status-box">未ログイン</div>
+    <div id="statusBox" class="status-box">ログイン状態を確認中...</div>
   </div>
 
   <script type="module">
@@ -83,9 +83,12 @@
       GoogleAuthProvider,
       signInWithPopup,
       signOut,
-      onAuthStateChanged
+      onAuthStateChanged,
+      setPersistence,
+      browserLocalPersistence
     } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
+    // ===== 設定ここから =====
     const firebaseConfig = {
       apiKey: "AIzaSyAXDhMT1IP1xQ9f0WiOIjmmfBHoQDWZ0dI",
       authDomain: "shiftcore-div.firebaseapp.com",
@@ -95,8 +98,10 @@
       appId: "1:882342275588:web:bab610608d1bc00453e351"
     };
 
-    const GAS_WEBAPP_URL = "https://shiftcore-login-proxy.shiftcore-div.workers.dev/";
+    const LOGIN_CHECK_URL = "https://shiftcore-login-proxy.shiftcore-div.workers.dev/";
+    // ===== 設定ここまで =====
 
+    // ===== 初期化ここから =====
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
@@ -104,13 +109,36 @@
     const loginBtn = document.getElementById("loginBtn");
     const logoutBtn = document.getElementById("logoutBtn");
     const statusBox = document.getElementById("statusBox");
+    // ===== 初期化ここまで =====
 
+    // ===== 共通表示ここから =====
     function setStatus(message) {
       statusBox.textContent = message;
     }
 
+    function showLoggedOutState(message = "未ログイン") {
+      loginBtn.style.display = "block";
+      logoutBtn.style.display = "none";
+      setStatus(message);
+    }
+
+    function showLoggedInState(loginCheck) {
+      loginBtn.style.display = "none";
+      logoutBtn.style.display = "block";
+
+      setStatus(
+        "ログイン成功\n\n" +
+        "名前: " + loginCheck.user.name + "\n" +
+        "メール: " + loginCheck.user.email + "\n" +
+        "ロール: " + loginCheck.user.role + "\n" +
+        "利用可能モジュール: " + loginCheck.user.allowed_modules.join(", ")
+      );
+    }
+    // ===== 共通表示ここまで =====
+
+    // ===== GAS照合ここから =====
     async function checkUserWithGas(email) {
-      const response = await fetch(GAS_WEBAPP_URL, {
+      const response = await fetch(LOGIN_CHECK_URL, {
         method: "POST",
         headers: {
           "Content-Type": "text/plain;charset=utf-8"
@@ -121,7 +149,41 @@
       const result = await response.json();
       return result;
     }
+    // ===== GAS照合ここまで =====
 
+    // ===== ログインユーザー照合ここから =====
+    async function verifySignedInUser(user) {
+      if (!user || !user.email) {
+        showLoggedOutState("未ログイン");
+        return;
+      }
+
+      try {
+        setStatus("アカウント照合中...");
+
+        const loginCheck = await checkUserWithGas(user.email);
+
+        if (loginCheck.ok) {
+          showLoggedInState(loginCheck);
+        } else {
+          await signOut(auth);
+          showLoggedOutState(
+            "ログイン不可\n\n" +
+            "code: " + loginCheck.code + "\n" +
+            "message: " + loginCheck.message
+          );
+        }
+      } catch (error) {
+        showLoggedOutState("エラー\n\n" + error.message);
+      }
+    }
+    // ===== ログインユーザー照合ここまで =====
+
+    // ===== 初期永続化設定ここから =====
+    await setPersistence(auth, browserLocalPersistence);
+    // ===== 初期永続化設定ここまで =====
+
+    // ===== ログイン処理ここから =====
     loginBtn.addEventListener("click", async () => {
       try {
         setStatus("Googleログイン中...");
@@ -129,56 +191,33 @@
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
 
-        if (!user || !user.email) {
-          setStatus("メールアドレスが取得できませんでした");
-          return;
-        }
-
-        setStatus("アカウント照合中...");
-
-        const loginCheck = await checkUserWithGas(user.email);
-
-        if (loginCheck.ok) {
-          loginBtn.style.display = "none";
-          logoutBtn.style.display = "block";
-
-          setStatus(
-            "ログイン成功\n\n" +
-            "名前: " + loginCheck.user.name + "\n" +
-            "メール: " + loginCheck.user.email + "\n" +
-            "ロール: " + loginCheck.user.role + "\n" +
-            "利用可能モジュール: " + loginCheck.user.allowed_modules.join(", ")
-          );
-        } else {
-          setStatus(
-            "ログイン不可\n\n" +
-            "code: " + loginCheck.code + "\n" +
-            "message: " + loginCheck.message
-          );
-
-          await signOut(auth);
-        }
-
+        await verifySignedInUser(user);
       } catch (error) {
-        setStatus("エラー\n\n" + error.message);
+        showLoggedOutState("エラー\n\n" + error.message);
       }
     });
+    // ===== ログイン処理ここまで =====
 
+    // ===== ログアウト処理ここから =====
     logoutBtn.addEventListener("click", async () => {
       try {
         await signOut(auth);
-        setStatus("ログアウトしました");
+        showLoggedOutState("ログアウトしました");
       } catch (error) {
         setStatus("ログアウトエラー\n\n" + error.message);
       }
     });
+    // ===== ログアウト処理ここまで =====
 
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        loginBtn.style.display = "block";
-        logoutBtn.style.display = "none";
+    // ===== 認証状態監視ここから =====
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        await verifySignedInUser(user);
+      } else {
+        showLoggedOutState("未ログイン");
       }
     });
+    // ===== 認証状態監視ここまで =====
   </script>
 </body>
 </html>

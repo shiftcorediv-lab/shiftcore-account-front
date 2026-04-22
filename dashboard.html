@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ShiftCore Dashboard</title>
   <style>
-    /* ===== 全体ここから ===== */
     body {
       font-family: Arial, sans-serif;
       background: #f7f7f7;
@@ -64,6 +63,24 @@
       font-size: 13px;
       color: #555;
       word-break: break-word;
+      margin-bottom: 12px;
+    }
+
+    .module-card button {
+      width: 100%;
+      padding: 10px 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #111;
+      color: #fff;
+      font-size: 14px;
+    }
+
+    .module-card button:disabled {
+      background: #ccc;
+      color: #666;
+      cursor: not-allowed;
     }
 
     .button-row {
@@ -100,7 +117,6 @@
       white-space: pre-wrap;
       word-break: break-word;
     }
-    /* ===== 全体ここまで ===== */
   </style>
 </head>
 <body>
@@ -122,7 +138,7 @@
       <button id="backToLoginBtn">ログイン画面へ戻る</button>
     </div>
 
-    <div id="statusBox" class="status-box">ダッシュボードを読み込みました</div>
+    <div id="statusBox" class="status-box">ログイン済みユーザー情報を表示中</div>
   </div>
 
   <script type="module">
@@ -144,9 +160,9 @@
     };
 
     const LOGIN_PAGE_URL = "./index.html";
+    const PMO_URL = "ここにPMOのURLを入れる";
     // ===== 設定ここまで =====
 
-    // ===== 初期化ここから =====
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
@@ -158,9 +174,7 @@
     const logoutBtn = document.getElementById("logoutBtn");
     const backToLoginBtn = document.getElementById("backToLoginBtn");
     const statusBox = document.getElementById("statusBox");
-    // ===== 初期化ここまで =====
 
-    // ===== 表示制御ここから =====
     function setStatus(message) {
       statusBox.textContent = message;
     }
@@ -168,9 +182,7 @@
     function goToLogin() {
       window.location.href = LOGIN_PAGE_URL;
     }
-    // ===== 表示制御ここまで =====
 
-    // ===== セッション読取ここから =====
     function getStoredUser() {
       const raw = sessionStorage.getItem("shiftcore_user");
 
@@ -184,9 +196,16 @@
         return null;
       }
     }
-    // ===== セッション読取ここまで =====
 
-    // ===== モジュール表示ここから =====
+    function openModule(moduleCode) {
+      if (moduleCode === "pmo") {
+        window.location.href = PMO_URL;
+        return;
+      }
+
+      setStatus("このモジュールはまだ接続されていません: " + moduleCode);
+    }
+
     function renderModules(modules) {
       moduleList.innerHTML = "";
 
@@ -213,14 +232,23 @@
         code.className = "module-card-code";
         code.textContent = "module_code: " + moduleCode;
 
+        const button = document.createElement("button");
+
+        if (moduleCode === "https://pickmyoff.another-inc.workers.dev?v=1") {
+          button.textContent = "開く";
+          button.addEventListener("click", () => openModule(moduleCode));
+        } else {
+          button.textContent = "準備中";
+          button.disabled = true;
+        }
+
         card.appendChild(title);
         card.appendChild(code);
+        card.appendChild(button);
         moduleList.appendChild(card);
       });
     }
-    // ===== モジュール表示ここまで =====
 
-    // ===== ユーザー表示ここから =====
     function renderUser(user) {
       nameText.textContent = user.name || "";
       emailText.textContent = user.email || "";
@@ -229,9 +257,7 @@
 
       renderModules(user.allowed_modules || []);
     }
-    // ===== ユーザー表示ここまで =====
 
-    // ===== 初期表示ここから =====
     const storedUser = getStoredUser();
 
     if (!storedUser) {
@@ -241,9 +267,7 @@
       renderUser(storedUser);
       setStatus("ログイン済みユーザー情報を表示中");
     }
-    // ===== 初期表示ここまで =====
 
-    // ===== 認証状態監視ここから =====
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         sessionStorage.removeItem("shiftcore_user");
@@ -251,9 +275,7 @@
         setTimeout(goToLogin, 800);
       }
     });
-    // ===== 認証状態監視ここまで =====
 
-    // ===== ログアウト処理ここから =====
     logoutBtn.addEventListener("click", async () => {
       try {
         await signOut(auth);
@@ -267,7 +289,6 @@
     backToLoginBtn.addEventListener("click", () => {
       goToLogin();
     });
-    // ===== ログアウト処理ここまで =====
   </script>
 </body>
 </html>

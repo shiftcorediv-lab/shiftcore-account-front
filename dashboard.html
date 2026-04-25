@@ -160,7 +160,7 @@
     };
 
     const LOGIN_PAGE_URL = "./index.html";
-    const PMO_URL = "https://pickmyoff.another-inc.workers.dev";
+    const PMO_V2_URL = "https://shiftcorediv-lab.github.io/pickmyoff_v2_front/";
     // ===== 設定ここまで =====
 
     const app = initializeApp(firebaseConfig);
@@ -201,16 +201,27 @@
   const storedUser = getStoredUser();
 
   if (moduleCode === "pmo") {
-    const targetUrl = new URL(PMO_URL);
-    targetUrl.searchParams.set("from", "shiftcore");
-    targetUrl.searchParams.set("module", "pmo");
-    targetUrl.searchParams.set("v", "1");
-
-    if (storedUser && storedUser.employee_code) {
-      targetUrl.searchParams.set("employee_code", storedUser.employee_code);
+    if (!storedUser) {
+      setStatus("ユーザー情報がありません");
+      return;
     }
 
-    alert(targetUrl.toString());
+    // backend が返した正式URLを最優先で使う
+    if (storedUser.pmoV2Url) {
+      window.location.href = storedUser.pmoV2Url;
+      return;
+    }
+
+    // 念のため fallback
+    const targetUrl = new URL(PMO_V2_URL);
+    targetUrl.searchParams.set("from", "shiftcore");
+    targetUrl.searchParams.set("module", "pmo");
+    targetUrl.searchParams.set("userId", storedUser.userId || storedUser.internal_user_id || "");
+    targetUrl.searchParams.set("displayName", storedUser.displayName || storedUser.name || "");
+    targetUrl.searchParams.set("employeeCode", storedUser.employeeCode || storedUser.employee_code || "");
+    targetUrl.searchParams.set("role", storedUser.role || "");
+    targetUrl.searchParams.set("workStatus", storedUser.workStatus || storedUser.work_status || "");
+
     window.location.href = targetUrl.toString();
     return;
   }

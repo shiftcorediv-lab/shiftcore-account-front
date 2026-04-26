@@ -8,4 +8,4 @@ export const firebaseConfig = {
 };
 
 export const LOGIN_CHECK_URL = "https://shiftcore-login-proxy.shiftcore-div.workers.dev/";
-export const DASHBOARD_URL = "../../dashboard.html";
+export const DASHBOARD_URL = "./dashboard.html";

@@ -11,7 +11,7 @@
     <div class="card">
       <h1>PMO管理</h1>
       <div class="description">
-        希望休一覧の確認とCSV出力を行います。
+        希望休一覧の確認とExcel出力を行います。
       </div>
 
       <div id="entryBannerArea"></div>
@@ -45,16 +45,16 @@
       <div class="button-stack">
         <button class="open-btn" id="openMonthlyBtn" type="button">希望休一覧を開く</button>
         <button class="open-btn" id="openRequestBtn" type="button">申請原本を開く</button>
-        <button class="csv-btn" id="downloadCsvBtn" type="button">CSV出力</button>
+        <button class="csv-btn" id="downloadCsvBtn" type="button">Excel出力</button>
       </div>
 
       <div class="hint" id="manageHint">管理対象ロールのみ利用できます。</div>
     </div>
 
     <div class="card">
-      <button class="csv-btn" id="downloadCsvBtn" type="button">Excel出力</button>
-      <div class="message" id="messageBox"></div>
-    </div>
+  <button class="back-btn" id="backToDashboardBtn" type="button">ダッシュボードへ戻る</button>
+  <div class="message" id="messageBox"></div>
+</div>
   </div>
 
   <script type="module" src="./js/pmo-admin/main.js"></script>

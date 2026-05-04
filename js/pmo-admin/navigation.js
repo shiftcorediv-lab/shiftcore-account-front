@@ -14,7 +14,8 @@ export function openUrl(url) {
 }
 
 export function downloadCsvFile(fileName, csvText) {
-  const blob = new Blob([csvText], { type: "text/csv;charset=utf-8;" });
+  const bom = "\uFEFF";
+  const blob = new Blob([bom, csvText], { type: "text/csv;charset=utf-8;" });
   const blobUrl = URL.createObjectURL(blob);
 
   const a = document.createElement("a");

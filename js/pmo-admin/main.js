@@ -13,8 +13,8 @@ import {
   updateManageState,
   showMessage
 } from "./ui.js";
-import { canManagePmo, goToDashboard, openUrl, downloadCsvFile } from "./navigation.js";
-import { fetchPmoAdminMeta, fetchMonthlyCsv } from "./api.js";
+import { canManagePmo, goToDashboard, openUrl, downloadExcelFile } from "./navigation.js";
+import { fetchPmoAdminMeta, fetchMonthlyExcel } from "./api.js";
 
 const params = getQueryParams();
 const currentUser = buildCurrentUserFromQuery(params);
@@ -81,21 +81,21 @@ downloadCsvBtn.addEventListener("click", async () => {
     return;
   }
 
-  showMessage("CSVを生成中...");
+  showMessage("Excelを生成中...");
 
   try {
-    const result = await fetchMonthlyCsv(currentMeta.selectedYearMonth, currentUser.role);
+    const result = await fetchMonthlyExcel(currentMeta.selectedYearMonth, currentUser.role);
 
     if (!result.success) {
-      showMessage(result.message || "CSV出力に失敗しました", "error");
+      showMessage(result.message || "Excel出力に失敗しました", "error");
       return;
     }
 
-    downloadCsvFile(result.fileName, result.csvText);
-    showMessage("CSVをダウンロードしました", "success");
+    downloadExcelFile(result.fileName, result.base64Data, result.mimeType);
+    showMessage("Excelをダウンロードしました", "success");
   } catch (error) {
     console.error(error);
-    showMessage("CSV出力に失敗しました", "error");
+    showMessage("Excel出力に失敗しました", "error");
   }
 });
 

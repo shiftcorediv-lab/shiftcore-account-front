@@ -17,9 +17,9 @@ export async function fetchPmoAdminMeta(targetYearMonth, role) {
   return await response.json();
 }
 
-export async function fetchMonthlyCsv(targetYearMonth, role) {
+export async function fetchMonthlyExcel(targetYearMonth, role) {
   const url = new URL(PMO_ADMIN_API_URL);
-  url.searchParams.set("action", "exportMonthlyCsv");
+  url.searchParams.set("action", "exportMonthlyExcel");
   url.searchParams.set("targetYearMonth", targetYearMonth || "");
   url.searchParams.set("role", role || "");
 
@@ -28,7 +28,7 @@ export async function fetchMonthlyCsv(targetYearMonth, role) {
   });
 
   if (!response.ok) {
-    throw new Error("CSV取得に失敗しました: " + response.status);
+    throw new Error("Excel取得に失敗しました: " + response.status);
   }
 
   return await response.json();

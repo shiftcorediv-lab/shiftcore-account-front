@@ -2,15 +2,29 @@ import { MODULE_NAME_MAP } from "./config.js";
 import { moduleList } from "./dom.js";
 import { openModule } from "./navigation.js";
 
-export function renderModules(modules, setStatus) {
+function canShowModule(moduleCode, user) {
+  const role = String(user?.role || "").trim().toLowerCase();
+
+  if (moduleCode === "account") {
+    return role === "admin" || role === "developer";
+  }
+
+  return true;
+}
+
+export function renderModules(modules, user, setStatus) {
   moduleList.innerHTML = "";
 
-  if (!Array.isArray(modules) || modules.length === 0) {
+  const visibleModules = Array.isArray(modules)
+    ? modules.filter((moduleCode) => canShowModule(moduleCode, user))
+    : [];
+
+  if (visibleModules.length === 0) {
     moduleList.innerHTML = "<div class='module-card'><div class='module-card-title'>利用可能モジュールなし</div></div>";
     return;
   }
 
-  modules.forEach((moduleCode) => {
+  visibleModules.forEach((moduleCode) => {
     const card = document.createElement("div");
     card.className = "module-card";
 
@@ -24,7 +38,7 @@ export function renderModules(modules, setStatus) {
 
     const button = document.createElement("button");
 
-    if (moduleCode === "pmo") {
+    if (moduleCode === "pmo" || moduleCode === "account") {
       button.textContent = "開く";
       button.addEventListener("click", () => openModule(moduleCode, setStatus));
     } else {

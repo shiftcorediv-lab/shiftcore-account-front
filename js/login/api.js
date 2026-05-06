@@ -6,8 +6,10 @@ export async function checkUserWithGas(email) {
     headers: {
       "Content-Type": "text/plain;charset=utf-8"
     },
-    body: JSON.stringify({ email })
-  });
+    body: JSON.stringify({
+  action: "checkLoginUserByEmail",
+  email: email
+});
 
   const result = await response.json();
   return result;

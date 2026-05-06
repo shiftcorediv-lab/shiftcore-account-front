@@ -17,5 +17,5 @@ export function renderUser(user) {
   roleText.textContent = user.role || "";
   organizationText.textContent = user.organization_id || "";
 
-  renderModules(user.allowed_modules || [], setStatus);
+  renderModules(user.allowed_modules || [], user, setStatus);
 }

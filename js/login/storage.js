@@ -5,3 +5,11 @@ export function saveLoginSession(loginCheck) {
 export function clearLoginSession() {
   sessionStorage.removeItem("shiftcore_user");
 }
+
+export function saveSignupEmail(email) {
+  sessionStorage.setItem("shiftcore_signup_email", String(email || "").trim().toLowerCase());
+}
+
+export function clearSignupEmail() {
+  sessionStorage.removeItem("shiftcore_signup_email");
+}

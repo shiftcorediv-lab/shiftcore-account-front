@@ -18,7 +18,6 @@ export const organizationIdInput = document.getElementById("organizationIdInput"
 export const allowedModulesInput = document.getElementById("allowedModulesInput");
 export const statusSelect = document.getElementById("statusSelect");
 export const workStatusSelect = document.getElementById("workStatusSelect");
-export const employeeCodeInput = document.getElementById("employeeCodeInput");
 
 export const approveBtn = document.getElementById("approveBtn");
 export const rejectBtn = document.getElementById("rejectBtn");

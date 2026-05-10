@@ -17,7 +17,6 @@ import {
   allowedModulesInput,
   statusSelect,
   workStatusSelect,
-  employeeCodeInput,
   approveBtn,
   rejectBtn
 } from "./dom.js";
@@ -139,7 +138,6 @@ export function applyApprovalDefaults(request) {
   workStatusSelect.value = "on";
   organizationIdInput.value = "";
   allowedModulesInput.value = "";
-  employeeCodeInput.value = "";
 }
 
 export function setActionButtonsEnabled(enabled) {

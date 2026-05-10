@@ -8,7 +8,6 @@ import {
   allowedModulesInput,
   statusSelect,
   workStatusSelect,
-  employeeCodeInput
 } from "./dom.js";
 import {
   renderAccountInfo,
@@ -85,7 +84,6 @@ approveBtn.addEventListener("click", async () => {
         allowedModules: allowedModulesInput.value.trim().split(",").map(v => v.trim()).filter(Boolean),
         status: statusSelect.value,
         workStatus: workStatusSelect.value,
-        employeeCode: employeeCodeInput.value.trim()
       },
       currentUser.userId
     );

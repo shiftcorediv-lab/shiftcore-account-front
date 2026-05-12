@@ -123,24 +123,38 @@ export function renderRequestDetail(request) {
 
 export function applyApprovalDefaults(request) {
   const type = String(request?.applicant_type || "").trim();
+  const companyName = String(request?.company_name || "").trim();
 
   if (type === "employee") {
     roleSelect.value = "employee";
-  } else if (type === "partner_individual") {
-    roleSelect.value = "partner_individual";
-  } else if (type === "partner_company_admin") {
-    roleSelect.value = "partner_company_admin";
-  } else {
-    roleSelect.value = "";
+    organizationIdInput.value = "another";
+    allowedModulesInput.value = "pmo";
+    statusSelect.value = "active";
+    workStatusSelect.value = "on";
+    return;
   }
 
-  statusSelect.value = "active";
-  workStatusSelect.value = "on";
+  if (type === "partner_individual") {
+    roleSelect.value = "partner_individual";
+    organizationIdInput.value = companyName;
+    allowedModulesInput.value = "pmo";
+    statusSelect.value = "active";
+    workStatusSelect.value = "on";
+    return;
+  }
+
+  if (type === "partner_company_admin") {
+    roleSelect.value = "partner_company_admin";
+    organizationIdInput.value = companyName;
+    allowedModulesInput.value = "partner_hub";
+    statusSelect.value = "active";
+    workStatusSelect.value = "on";
+    return;
+  }
+
+  roleSelect.value = "";
   organizationIdInput.value = "";
   allowedModulesInput.value = "";
-}
-
-export function setActionButtonsEnabled(enabled) {
-  approveBtn.disabled = !enabled;
-  rejectBtn.disabled = !enabled;
+  statusSelect.value = "active";
+  workStatusSelect.value = "on";
 }

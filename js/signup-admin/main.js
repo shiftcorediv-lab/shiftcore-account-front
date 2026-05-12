@@ -23,6 +23,9 @@ import { fetchSignupRequests, approveSignupRequest, rejectSignupRequest } from "
 
 const params = getQueryParams();
 const currentUser = buildCurrentUserFromQuery(params);
+
+sessionStorage.setItem("shiftcore_portal_user", JSON.stringify(currentUser));
+
 const canUse = canUseSignupAdmin(currentUser);
 
 let selectedRequest = null;

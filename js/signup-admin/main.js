@@ -135,7 +135,7 @@ rejectBtn.addEventListener("click", async () => {
 });
 
 backToAccountPortalBtn.addEventListener("click", () => {
-  goToAccountPortal();
+  goToAccountPortal(currentUser);
 });
 
 await loadRequests();

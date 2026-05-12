@@ -6,6 +6,8 @@ import { canUseAccountPortal, buildSignupAdminUrl, goToDashboard } from "./navig
 const params = getQueryParams();
 const currentUser = buildCurrentUserFromQuery(params);
 
+sessionStorage.setItem("shiftcore_portal_user", JSON.stringify(currentUser));
+
 setupShiftCoreEntryBanner(params);
 renderAccountInfo(currentUser);
 

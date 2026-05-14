@@ -158,3 +158,8 @@ export function applyApprovalDefaults(request) {
   statusSelect.value = "active";
   workStatusSelect.value = "on";
 }
+
+export function setActionButtonsEnabled(enabled) {
+  approveBtn.disabled = !enabled;
+  rejectBtn.disabled = !enabled;
+}

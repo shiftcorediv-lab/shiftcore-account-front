@@ -7,9 +7,14 @@ export const monthSelect = document.getElementById("monthSelect");
 export const monthHint = document.getElementById("monthHint");
 export const manageHint = document.getElementById("manageHint");
 
+export const refreshTableBtn = document.getElementById("refreshTableBtn");
+export const downloadCsvBtn = document.getElementById("downloadCsvBtn");
+
+export const requestTableArea = document.getElementById("requestTableArea");
+
+export const developerToolsCard = document.getElementById("developerToolsCard");
 export const openMonthlyBtn = document.getElementById("openMonthlyBtn");
 export const openRequestBtn = document.getElementById("openRequestBtn");
-export const downloadCsvBtn = document.getElementById("downloadCsvBtn");
-export const backToDashboardBtn = document.getElementById("backToDashboardBtn");
 
+export const backToDashboardBtn = document.getElementById("backToDashboardBtn");
 export const messageBox = document.getElementById("messageBox");

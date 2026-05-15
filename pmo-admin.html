@@ -11,7 +11,7 @@
     <div class="card">
       <h1>PMO管理</h1>
       <div class="description">
-        希望休一覧の確認とExcel出力を行います。
+        月ごとの希望休一覧を確認し、必要に応じて更新・出力します。
       </div>
 
       <div id="entryBannerArea"></div>
@@ -33,7 +33,7 @@
     <div class="card">
       <h2>対象月</h2>
 
-      <label for="monthSelect">希望休一覧の月を選択</label>
+      <label for="monthSelect">表示する月を選択</label>
       <select id="monthSelect" class="select-box"></select>
 
       <div class="hint" id="monthHint">存在する月のみ選択できます。</div>
@@ -43,18 +43,38 @@
       <h2>操作</h2>
 
       <div class="button-stack">
-        <button class="open-btn" id="openMonthlyBtn" type="button">希望休一覧を開く</button>
-        <button class="open-btn" id="openRequestBtn" type="button">申請原本を開く</button>
+        <button class="open-btn" id="refreshTableBtn" type="button">一覧を更新</button>
         <button class="csv-btn" id="downloadCsvBtn" type="button">Excel出力</button>
       </div>
 
-      <div class="hint" id="manageHint">管理対象ロールのみ利用できます。</div>
+      <div class="hint" id="manageHint">対象月を選択後、一覧を更新すると最新状態を読み込みます。</div>
+      <div class="message" id="messageBox"></div>
     </div>
 
     <div class="card">
-  <button class="back-btn" id="backToDashboardBtn" type="button">ダッシュボードへ戻る</button>
-  <div class="message" id="messageBox"></div>
-</div>
+      <h2>希望休一覧</h2>
+      <div class="hint">この画面上で月次一覧を確認できます。原本スプレッドシートの直接操作は行いません。</div>
+
+      <div class="table-wrap">
+        <div id="requestTableArea" class="table-placeholder">
+          対象月を選択すると一覧を表示します。
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="developerToolsCard" style="display: none;">
+      <h2>developer専用</h2>
+      <div class="hint">原本確認やスプレッドシート直接確認が必要な場合のみ使用します。</div>
+
+      <div class="button-stack">
+        <button class="open-btn" id="openMonthlyBtn" type="button">希望休一覧スプシを開く</button>
+        <button class="open-btn" id="openRequestBtn" type="button">申請原本を開く</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <button class="back-btn" id="backToDashboardBtn" type="button">ダッシュボードへ戻る</button>
+    </div>
   </div>
 
   <script type="module" src="./js/pmo-admin/main.js"></script>

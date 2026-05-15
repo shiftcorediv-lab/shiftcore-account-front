@@ -7,21 +7,28 @@ import {
   monthHint,
   manageHint,
   messageBox,
+  requestTableArea,
+  developerToolsCard,
   openMonthlyBtn,
   openRequestBtn,
+  refreshTableBtn,
   downloadCsvBtn
 } from "./dom.js";
 
 export function setInfoBox(target, text, type = "") {
   target.textContent = text;
   target.className = "info-box";
-  if (type) target.classList.add(type);
+  if (type) {
+    target.classList.add(type);
+  }
 }
 
 export function showMessage(text, type = "") {
   messageBox.textContent = text;
   messageBox.className = "message";
-  if (type) messageBox.classList.add(type);
+  if (type) {
+    messageBox.classList.add(type);
+  }
 }
 
 export function renderAccountInfo(currentUser) {
@@ -75,34 +82,109 @@ export function renderMonthOptions(months, selectedYearMonth) {
   if (!Array.isArray(months) || months.length === 0) {
     const option = document.createElement("option");
     option.value = "";
-    option.textContent = "利用可能な月がありません";
+    option.textContent = "選択可能な月がありません";
     monthSelect.appendChild(option);
     monthSelect.disabled = true;
-    monthHint.textContent = "希望休一覧シートがまだありません。";
+    monthHint.textContent = "選択可能な月がありません。";
     return;
   }
 
   monthSelect.disabled = false;
-  monthHint.textContent = "存在する月のみ選択できます。";
 
-  months.forEach((ym) => {
+  months.forEach((month) => {
     const option = document.createElement("option");
-    option.value = ym;
-    option.textContent = ym;
-    if (ym === selectedYearMonth) {
+    option.value = month.value || "";
+    option.textContent = month.label || month.value || "";
+    if ((month.value || "") === selectedYearMonth) {
       option.selected = true;
     }
     monthSelect.appendChild(option);
   });
+
+  monthHint.textContent = "存在する月のみ選択できます。";
 }
 
-export function updateManageState(canManage) {
-  openMonthlyBtn.disabled = !canManage;
-  openRequestBtn.disabled = !canManage;
+export function updateManageState(canManage, currentUser = null) {
+  const role = String(currentUser?.role || "").trim().toLowerCase();
+  const isDeveloper = role === "developer";
+
+  refreshTableBtn.disabled = !canManage;
   downloadCsvBtn.disabled = !canManage;
-  monthSelect.disabled = !canManage || monthSelect.disabled;
+
+  if (openMonthlyBtn) {
+    openMonthlyBtn.disabled = !isDeveloper;
+  }
+
+  if (openRequestBtn) {
+    openRequestBtn.disabled = !isDeveloper;
+  }
+
+  if (developerToolsCard) {
+    developerToolsCard.style.display = isDeveloper ? "block" : "none";
+  }
 
   manageHint.textContent = canManage
-    ? "対象月を選択して操作できます。"
+    ? "対象月を選択後、一覧を更新すると最新状態を読み込みます。"
     : "このアカウントには管理権限がありません。";
+}
+
+export function renderEmptyTable(message = "対象月を選択すると一覧を表示します。") {
+  requestTableArea.className = "table-placeholder";
+  requestTableArea.textContent = message;
+}
+
+function createCell(text, tagName = "td") {
+  const cell = document.createElement(tagName);
+  cell.textContent = text == null ? "" : String(text);
+  return cell;
+}
+
+function createTableHeader(headers) {
+  const thead = document.createElement("thead");
+  const row = document.createElement("tr");
+
+  headers.forEach((header) => {
+    row.appendChild(createCell(header, "th"));
+  });
+
+  thead.appendChild(row);
+  return thead;
+}
+
+function createTableBody(rows) {
+  const tbody = document.createElement("tbody");
+
+  rows.forEach((rowData) => {
+    const row = document.createElement("tr");
+
+    rowData.forEach((cellValue) => {
+      row.appendChild(createCell(cellValue));
+    });
+
+    tbody.appendChild(row);
+  });
+
+  return tbody;
+}
+
+export function renderMonthlyTable(tableData) {
+  if (!tableData || !Array.isArray(tableData.headers) || tableData.headers.length === 0) {
+    renderEmptyTable("表示できる一覧データがありません。");
+    return;
+  }
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "spreadsheet-table-wrap";
+
+  const table = document.createElement("table");
+  table.className = "spreadsheet-table";
+
+  table.appendChild(createTableHeader(tableData.headers));
+  table.appendChild(createTableBody(Array.isArray(tableData.rows) ? tableData.rows : []));
+
+  wrapper.appendChild(table);
+
+  requestTableArea.className = "";
+  requestTableArea.innerHTML = "";
+  requestTableArea.appendChild(wrapper);
 }

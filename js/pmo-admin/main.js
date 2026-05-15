@@ -4,6 +4,7 @@ import {
   openMonthlyBtn,
   openRequestBtn,
   downloadCsvBtn,
+  refreshTableBtn,
   backToDashboardBtn
 } from "./dom.js";
 import {
@@ -11,10 +12,21 @@ import {
   setupShiftCoreEntryBanner,
   renderMonthOptions,
   updateManageState,
+  renderEmptyTable,
+  renderMonthlyTable,
   showMessage
 } from "./ui.js";
-import { canManagePmo, goToDashboard, openUrl, downloadExcelFile } from "./navigation.js";
-import { fetchPmoAdminMeta, fetchMonthlyExcel } from "./api.js";
+import {
+  canManagePmo,
+  goToDashboard,
+  openUrl,
+  downloadExcelFile
+} from "./navigation.js";
+import {
+  fetchPmoAdminMeta,
+  fetchMonthlyExcel,
+  fetchPmoMonthlyTable
+} from "./api.js";
 
 const params = getQueryParams();
 const currentUser = buildCurrentUserFromQuery(params);
@@ -24,7 +36,8 @@ let currentMeta = null;
 
 setupShiftCoreEntryBanner(params);
 renderAccountInfo(currentUser);
-updateManageState(canManage);
+updateManageState(canManage, currentUser);
+renderEmptyTable("対象月を選択すると一覧を表示します。");
 
 async function loadMeta(targetYearMonth = "") {
   if (!canManage) {
@@ -44,17 +57,63 @@ async function loadMeta(targetYearMonth = "") {
 
     currentMeta = result;
     renderMonthOptions(result.months || [], result.selectedYearMonth || "");
-    updateManageState(true);
+    updateManageState(true, currentUser);
 
-    showMessage("管理情報を読み込みました", "success");
+    if (result.selectedYearMonth) {
+      await loadMonthlyTable(result.selectedYearMonth);
+    } else {
+      renderEmptyTable("表示できる月がありません。");
+      showMessage("管理情報を読み込みました", "success");
+    }
   } catch (error) {
     console.error(error);
     showMessage("管理情報の取得に失敗しました", "error");
   }
 }
 
+async function loadMonthlyTable(targetYearMonth = "") {
+  if (!canManage) {
+    renderEmptyTable("このアカウントには管理権限がありません。");
+    return;
+  }
+
+  const selectedYearMonth = String(targetYearMonth || monthSelect.value || "").trim();
+
+  if (!selectedYearMonth) {
+    renderEmptyTable("対象月を選択してください。");
+    return;
+  }
+
+  showMessage("一覧を更新中...");
+
+  try {
+    const result = await fetchPmoMonthlyTable(selectedYearMonth, currentUser.role);
+
+    if (!result.success) {
+      renderEmptyTable("一覧データの取得に失敗しました。");
+      showMessage(result.message || "一覧データの取得に失敗しました", "error");
+      return;
+    }
+
+    renderMonthlyTable({
+      headers: result.headers || [],
+      rows: result.rows || []
+    });
+
+    showMessage("一覧を更新しました", "success");
+  } catch (error) {
+    console.error(error);
+    renderEmptyTable("一覧データの取得に失敗しました。");
+    showMessage("一覧データの取得に失敗しました", "error");
+  }
+}
+
 monthSelect.addEventListener("change", async () => {
-  await loadMeta(monthSelect.value);
+  await loadMonthlyTable(monthSelect.value);
+});
+
+refreshTableBtn.addEventListener("click", async () => {
+  await loadMonthlyTable(monthSelect.value);
 });
 
 openMonthlyBtn.addEventListener("click", () => {
@@ -76,7 +135,11 @@ openRequestBtn.addEventListener("click", () => {
 });
 
 downloadCsvBtn.addEventListener("click", async () => {
-  if (!currentMeta || !currentMeta.selectedYearMonth) {
+  const selectedYearMonth = String(
+    (currentMeta && currentMeta.selectedYearMonth) || monthSelect.value || ""
+  ).trim();
+
+  if (!selectedYearMonth) {
     showMessage("対象月が選択されていません", "error");
     return;
   }
@@ -84,7 +147,7 @@ downloadCsvBtn.addEventListener("click", async () => {
   showMessage("Excelを生成中...");
 
   try {
-    const result = await fetchMonthlyExcel(currentMeta.selectedYearMonth, currentUser.role);
+    const result = await fetchMonthlyExcel(selectedYearMonth, currentUser.role);
 
     if (!result.success) {
       showMessage(result.message || "Excel出力に失敗しました", "error");

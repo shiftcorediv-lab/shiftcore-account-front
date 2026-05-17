@@ -93,11 +93,30 @@ export function renderMonthOptions(months, selectedYearMonth) {
 
   months.forEach((month) => {
     const option = document.createElement("option");
-    option.value = month.value || "";
-    option.textContent = month.label || month.value || "";
-    if ((month.value || "") === selectedYearMonth) {
+
+    let value = "";
+    let label = "";
+
+    if (typeof month === "string") {
+      value = month;
+      const parts = month.split("-");
+      if (parts.length === 2) {
+        label = parts[0] + "年" + Number(parts[1]) + "月";
+      } else {
+        label = month;
+      }
+    } else {
+      value = month?.value || "";
+      label = month?.label || value;
+    }
+
+    option.value = value;
+    option.textContent = label;
+
+    if (value === selectedYearMonth) {
       option.selected = true;
     }
+
     monthSelect.appendChild(option);
   });
 

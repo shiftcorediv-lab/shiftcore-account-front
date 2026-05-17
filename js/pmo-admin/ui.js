@@ -1,6 +1,7 @@
 import {
   userNameBox,
   employeeCodeBox,
+  roleBox,
   accountMetaArea,
   entryBannerArea,
   monthSelect,
@@ -44,36 +45,20 @@ export function renderAccountInfo(currentUser) {
     currentUser.employeeCode ? "success" : "error"
   );
 
-  accountMetaArea.innerHTML = "";
+  setInfoBox(
+    roleBox,
+    currentUser.role || "未設定",
+    currentUser.role ? "success" : "error"
+  );
 
-  const roleBadge = document.createElement("span");
-  roleBadge.className = "badge";
-  roleBadge.textContent = "role: " + (currentUser.role || "未設定");
-
-  const workStatusBadge = document.createElement("span");
-  workStatusBadge.className = "badge";
-  workStatusBadge.textContent = "workStatus: " + (currentUser.workStatus || "未設定");
-
-  accountMetaArea.appendChild(roleBadge);
-  accountMetaArea.appendChild(workStatusBadge);
+  if (accountMetaArea) {
+    accountMetaArea.innerHTML = "";
+  }
 }
 
 export function setupShiftCoreEntryBanner(params) {
-  if ((params.from || "") !== "shiftcore") return;
-
-  const banner = document.createElement("div");
-  banner.style.margin = "0 auto 16px";
-  banner.style.padding = "12px 14px";
-  banner.style.borderRadius = "12px";
-  banner.style.background = "#eef3ff";
-  banner.style.border = "1px solid #cfdcff";
-  banner.style.fontSize = "14px";
-  banner.style.lineHeight = "1.6";
-  banner.innerHTML = `
-    <div><strong>ShiftCoreから移動しました</strong></div>
-    <div>module: ${params.module || "unknown"}</div>
-  `;
-  entryBannerArea.appendChild(banner);
+  if (!entryBannerArea) return;
+  entryBannerArea.innerHTML = "";
 }
 
 export function renderMonthOptions(months, selectedYearMonth) {
@@ -91,7 +76,7 @@ export function renderMonthOptions(months, selectedYearMonth) {
 
   monthSelect.disabled = false;
 
-  months.forEach((month) => {
+  months.forEach((month, index) => {
     const option = document.createElement("option");
 
     let value = "";
@@ -100,11 +85,7 @@ export function renderMonthOptions(months, selectedYearMonth) {
     if (typeof month === "string") {
       value = month;
       const parts = month.split("-");
-      if (parts.length === 2) {
-        label = parts[0] + "年" + Number(parts[1]) + "月";
-      } else {
-        label = month;
-      }
+      label = parts.length === 2 ? parts[0] + "年" + Number(parts[1]) + "月" : month;
     } else {
       value = month?.value || "";
       label = month?.label || value;
@@ -118,7 +99,15 @@ export function renderMonthOptions(months, selectedYearMonth) {
     }
 
     monthSelect.appendChild(option);
+
+    if (index === 0 && !selectedYearMonth) {
+      monthSelect.value = value;
+    }
   });
+
+  if (!monthSelect.value && monthSelect.options.length > 0) {
+    monthSelect.selectedIndex = 0;
+  }
 
   monthHint.textContent = "存在する月のみ選択できます。";
 }

@@ -99,6 +99,18 @@ async function loadMeta(targetYearMonth = "") {
     renderMonthOptions(result.months || [], result.selectedYearMonth || "");
     updateManageState(true, currentUser);
 
+    const initialHeaders = result.initialTable?.headers || [];
+    const initialRows = result.initialTable?.rows || [];
+
+    if (initialHeaders.length > 0) {
+      renderMonthlyTable({
+        headers: initialHeaders,
+        rows: initialRows
+      });
+      showMessage("管理情報を読み込みました", "success");
+      return;
+    }
+
     const effectiveYearMonth = result.selectedYearMonth || monthSelect.value || "";
 
     if (effectiveYearMonth) {

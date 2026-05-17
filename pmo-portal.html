@@ -7,26 +7,25 @@
   <link rel="stylesheet" href="./css/pmo-portal.css" />
 </head>
 <body>
+  <div id="developerMetaArea" class="developer-meta" style="display: none;"></div>
+
   <div class="container">
-    <div class="card">
+    <div class="card compact-card">
       <h1>PMO</h1>
       <div class="description">
         希望休の申請または管理を選択してください。
       </div>
 
-      <div id="entryBannerArea"></div>
+      <div class="info-compact-grid">
+        <div class="info-compact-item">
+          <label>ログインユーザー</label>
+          <div class="info-box" id="userNameBox">取得中...</div>
+        </div>
 
-      <label>ログインユーザー</label>
-      <div class="info-box" id="userNameBox">取得中...</div>
-
-      <div class="mt-12">
-        <label>社員コード</label>
-        <div class="info-box" id="employeeCodeBox">取得中...</div>
-      </div>
-
-      <div class="mt-12">
-        <label>アカウント情報</label>
-        <div id="accountMetaArea"></div>
+        <div class="info-compact-item">
+          <label>社員コード</label>
+          <div class="info-box" id="employeeCodeBox">取得中...</div>
+        </div>
       </div>
     </div>
 

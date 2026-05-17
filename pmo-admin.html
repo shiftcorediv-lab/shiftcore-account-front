@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pick My Off Admin</title>
-  <link rel="stylesheet" href="./css/pmo-admin.css?v=4" />
-  <link rel="stylesheet" href="./css/common-loading.css?v=4" />
+  <link rel="stylesheet" href="./css/pmo-admin.css?v=6" />
+  <link rel="stylesheet" href="./css/common-loading.css?v=6" />
 </head>
 <body>
   <div class="container">
@@ -33,7 +33,7 @@
       </div>
 
       <div id="entryBannerArea"></div>
-      <div id="accountMetaArea" style="display:none;"></div>
+      <div id="accountMetaArea" style="display: none;"></div>
     </div>
 
     <div class="card">
@@ -53,17 +53,21 @@
         <button class="csv-btn" id="downloadCsvBtn" type="button">Excel出力</button>
       </div>
 
-      <div class="hint" id="manageHint">対象月を選択後、一覧を更新すると最新状態を読み込みます。</div>
+      <div class="hint" id="manageHint">
+        対象月を選択後、一覧を更新すると最新状態を読み込みます。
+      </div>
       <div class="message" id="messageBox"></div>
     </div>
 
     <div class="card">
       <h2>希望休一覧</h2>
-      <div class="hint">この画面上で月次一覧を確認できます。原本スプレッドシートの直接操作は行いません。</div>
+      <div class="hint">
+        この画面上で月次一覧を確認できます。原本スプレッドシートの直接操作は行いません。
+      </div>
 
       <div class="table-wrap">
         <div id="requestTableArea" class="table-placeholder">
-          対象月を選択すると一覧を表示します。
+          認証確認後に一覧を表示します。
         </div>
       </div>
     </div>
@@ -83,6 +87,6 @@
     </div>
   </div>
 
-  <script type="module" src="./js/pmo-admin/main.js?v=5"></script>
+  <script type="module" src="./js/pmo-admin/main.js?v=6"></script>
 </body>
 </html>

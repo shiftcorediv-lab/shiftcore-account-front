@@ -1,5 +1,5 @@
 import { auth, onAuthStateChanged, signOut } from "../login/auth.js";
-import { checkUserWithGas } from "../login/api.js";
+import { resolveCurrentUserWithGasByIdToken } from "../login/api.js";
 
 function waitForAuthUser() {
   return new Promise((resolve) => {
@@ -34,7 +34,8 @@ export async function resolveAuthenticatedCurrentUser() {
     };
   }
 
-  const loginCheck = await checkUserWithGas(firebaseUser.email);
+  const idToken = await firebaseUser.getIdToken(true);
+  const loginCheck = await resolveCurrentUserWithGasByIdToken(idToken);
 
   if (!loginCheck?.ok) {
     return {
@@ -46,7 +47,8 @@ export async function resolveAuthenticatedCurrentUser() {
 
   return {
     ok: true,
-    user: normalizeResolvedUser(loginCheck, firebaseUser)
+    user: normalizeResolvedUser(loginCheck, firebaseUser),
+    idToken: idToken
   };
 }
 

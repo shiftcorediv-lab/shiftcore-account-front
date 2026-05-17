@@ -33,6 +33,7 @@ import { requireAuthenticatedCurrentUser } from "../common/auth-session.js";
 const params = getQueryParams();
 
 let currentUser = null;
+let currentIdToken = "";
 let canManage = false;
 let currentMeta = null;
 
@@ -53,6 +54,7 @@ async function initializePage() {
     }
 
     currentUser = authResult.user;
+    currentIdToken = authResult.idToken || "";
     canManage = canManagePmo(currentUser);
 
     renderAccountInfo(currentUser);
@@ -75,7 +77,7 @@ async function initializePage() {
 }
 
 async function loadMeta(targetYearMonth = "") {
-  if (!canManage || !currentUser) {
+  if (!canManage || !currentUser || !currentIdToken) {
     showMessage("このアカウントには管理権限がありません", "error");
     return;
   }
@@ -85,7 +87,7 @@ async function loadMeta(targetYearMonth = "") {
   showMessage("管理情報を取得中...");
 
   try {
-    const result = await fetchPmoAdminMeta(targetYearMonth, currentUser.role);
+    const result = await fetchPmoAdminMeta(targetYearMonth, currentIdToken);
 
     if (!result.success) {
       renderEmptyTable("管理情報の取得に失敗しました。");
@@ -115,7 +117,7 @@ async function loadMeta(targetYearMonth = "") {
 }
 
 async function loadMonthlyTable(targetYearMonth = "") {
-  if (!canManage || !currentUser) {
+  if (!canManage || !currentUser || !currentIdToken) {
     renderEmptyTable("このアカウントには管理権限がありません。");
     return;
   }
@@ -133,7 +135,7 @@ async function loadMonthlyTable(targetYearMonth = "") {
   showMessage("一覧を更新中...");
 
   try {
-    const result = await fetchPmoMonthlyTable(selectedYearMonth, currentUser.role);
+    const result = await fetchPmoMonthlyTable(selectedYearMonth, currentIdToken);
 
     if (!result.success) {
       renderEmptyTable("一覧データの取得に失敗しました。");
@@ -187,7 +189,7 @@ downloadCsvBtn.addEventListener("click", async () => {
     (currentMeta && currentMeta.selectedYearMonth) || monthSelect.value || ""
   ).trim();
 
-  if (!selectedYearMonth || !currentUser) {
+  if (!selectedYearMonth || !currentIdToken) {
     showMessage("対象月が選択されていません", "error");
     return;
   }
@@ -197,7 +199,7 @@ downloadCsvBtn.addEventListener("click", async () => {
   showMessage("Excelを生成中...");
 
   try {
-    const result = await fetchMonthlyExcel(selectedYearMonth, currentUser.role);
+    const result = await fetchMonthlyExcel(selectedYearMonth, currentIdToken);
 
     if (!result.success) {
       showMessage(result.message || "Excel出力に失敗しました", "error");

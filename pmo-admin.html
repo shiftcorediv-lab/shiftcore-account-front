@@ -3,32 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PMO管理</title>
-  <link rel="stylesheet" href="./css/pmo-admin.css" />
-  <link rel="stylesheet" href="./css/common-loading.css" />
+  <title>Pick My Off</title>
+  <link rel="stylesheet" href="./css/pmo-admin.css?v=4" />
+  <link rel="stylesheet" href="./css/common-loading.css?v=4" />
 </head>
 <body>
   <div class="container">
-    <div class="card">
-      <h1>PMO管理</h1>
+    <div class="card compact-card">
+      <h1>Pick My Off</h1>
       <div class="description">
-        月ごとの希望休一覧を確認し、必要に応じて更新・出力します。
+        希望休の一覧確認・更新・出力を行います。
+      </div>
+
+      <div class="info-compact-grid info-compact-grid-3">
+        <div class="info-compact-item">
+          <label>ログインユーザー</label>
+          <div class="info-box" id="userNameBox">取得中...</div>
+        </div>
+
+        <div class="info-compact-item">
+          <label>社員コード</label>
+          <div class="info-box" id="employeeCodeBox">取得中...</div>
+        </div>
+
+        <div class="info-compact-item">
+          <label>ロール</label>
+          <div class="info-box" id="roleBox">取得中...</div>
+        </div>
       </div>
 
       <div id="entryBannerArea"></div>
-
-      <label>ログインユーザー</label>
-      <div class="info-box" id="userNameBox">取得中...</div>
-
-      <div class="mt-12">
-        <label>社員コード</label>
-        <div class="info-box" id="employeeCodeBox">取得中...</div>
-      </div>
-
-      <div class="mt-12">
-        <label>アカウント情報</label>
-        <div id="accountMetaArea"></div>
-      </div>
+      <div id="accountMetaArea" style="display:none;"></div>
     </div>
 
     <div class="card">
@@ -78,6 +83,6 @@
     </div>
   </div>
 
-  <script type="module" src="./js/pmo-admin/main.js?v=3"></script>
+  <script type="module" src="./js/pmo-admin/main.js?v=5"></script>
 </body>
 </html>

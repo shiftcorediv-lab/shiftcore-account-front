@@ -1,7 +1,6 @@
 export const userNameBox = document.getElementById("userNameBox");
 export const employeeCodeBox = document.getElementById("employeeCodeBox");
-export const accountMetaArea = document.getElementById("accountMetaArea");
-export const entryBannerArea = document.getElementById("entryBannerArea");
+export const developerMetaArea = document.getElementById("developerMetaArea");
 
 export const goApplyBtn = document.getElementById("goApplyBtn");
 export const goManageBtn = document.getElementById("goManageBtn");

@@ -28,7 +28,7 @@ import {
   fetchMonthlyExcel,
   fetchPmoMonthlyTable
 } from "./api.js";
-import { requireAuthenticatedCurrentUser } from "../common/auth-session.js";
+import { requireAuthenticatedSession } from "../common/auth-session.js";
 
 const params = getQueryParams();
 
@@ -45,26 +45,15 @@ async function initializePage() {
   await waitForNextPaint();
 
   try {
-    const authResult = await requireAuthenticatedCurrentUser();
+    const sessionResult = await requireAuthenticatedSession();
 
-    if (!authResult.ok) {
+    if (!sessionResult.ok) {
       renderEmptyTable("認証確認に失敗しました。");
-      showMessage(authResult.message || "認証確認に失敗しました", "error");
+      showMessage(sessionResult.message || "認証確認に失敗しました", "error");
       return;
     }
 
-    currentUser = authResult.user;
-    currentIdToken = authResult.idToken || "";
-    canManage = canManagePmo(currentUser);
-
-    renderAccountInfo(currentUser);
-    updateManageState(canManage, currentUser);
-
-    if (!canManage) {
-      renderEmptyTable("このアカウントには管理権限がありません。");
-      showMessage("このアカウントには管理権限がありません", "error");
-      return;
-    }
+    currentIdToken = sessionResult.idToken || "";
 
     await loadMeta("");
   } catch (error) {
@@ -77,8 +66,8 @@ async function initializePage() {
 }
 
 async function loadMeta(targetYearMonth = "") {
-  if (!canManage || !currentUser || !currentIdToken) {
-    showMessage("このアカウントには管理権限がありません", "error");
+  if (!currentIdToken) {
+    showMessage("認証情報を取得できませんでした", "error");
     return;
   }
 
@@ -96,8 +85,22 @@ async function loadMeta(targetYearMonth = "") {
     }
 
     currentMeta = result;
+    currentUser = result.currentUser || null;
+    canManage = canManagePmo(currentUser);
+
+    if (currentUser) {
+      renderAccountInfo(currentUser);
+    }
+
+    updateManageState(canManage, currentUser);
+
+    if (!canManage) {
+      renderEmptyTable("このアカウントには管理権限がありません。");
+      showMessage("このアカウントには管理権限がありません", "error");
+      return;
+    }
+
     renderMonthOptions(result.months || [], result.selectedYearMonth || "");
-    updateManageState(true, currentUser);
 
     const initialHeaders = result.initialTable?.headers || [];
     const initialRows = result.initialTable?.rows || [];

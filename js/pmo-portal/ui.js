@@ -31,8 +31,13 @@ export function renderAccountInfo(currentUser) {
     currentUser.employeeCode || "社員コードを取得できませんでした",
     currentUser.employeeCode ? "success" : "error"
   );
-}
 
+  setInfoBox(
+    roleBox,
+    currentUser.role || "未設定",
+    currentUser.role ? "success" : "error"
+  );
+}
 export function renderDeveloperMeta(params, currentUser) {
   const role = String(currentUser?.role || "").trim().toLowerCase();
 

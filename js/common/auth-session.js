@@ -34,7 +34,7 @@ export async function resolveAuthenticatedCurrentUser() {
     };
   }
 
-  const idToken = await firebaseUser.getIdToken(true);
+  const idToken = await firebaseUser.getIdToken();
   const loginCheck = await resolveCurrentUserWithGasByIdToken(idToken);
 
   if (!loginCheck?.ok) {

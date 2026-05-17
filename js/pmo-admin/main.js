@@ -1,4 +1,4 @@
-import { showLoading, hideLoading } from "../common/loading.js";
+import { showLoading, hideLoading, waitForNextPaint } from "../common/loading.js";
 import { getQueryParams, buildCurrentUserFromQuery } from "./query.js";
 import {
   monthSelect,

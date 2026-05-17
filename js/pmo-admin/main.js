@@ -168,3 +168,10 @@ backToDashboardBtn.addEventListener("click", () => {
 });
 
 await loadMeta("");
+
+import { showLoading, hideLoading } from "../common/loading.js";
+
+showLoading("テスト中...");
+setTimeout(() => {
+  hideLoading();
+}, 1500);

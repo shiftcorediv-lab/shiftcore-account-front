@@ -18,3 +18,4 @@ export const openRequestBtn = document.getElementById("openRequestBtn");
 
 export const backToDashboardBtn = document.getElementById("backToDashboardBtn");
 export const messageBox = document.getElementById("messageBox");
+export const roleBox = document.getElementById("roleBox");

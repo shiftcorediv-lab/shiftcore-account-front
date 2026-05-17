@@ -38,3 +38,11 @@ export function hideLoading() {
   overlayEl.classList.remove("is-visible");
   document.body.classList.remove("loading-lock");
 }
+
+export function waitForNextPaint() {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(resolve);
+    });
+  });
+}

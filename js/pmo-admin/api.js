@@ -1,52 +1,41 @@
 import { PMO_ADMIN_API_URL } from "./config.js";
 
-export async function fetchPmoAdminMeta(targetYearMonth = "", role = "") {
-  const url = new URL(PMO_ADMIN_API_URL);
-  url.searchParams.set("action", "getPmoAdminMeta");
-  url.searchParams.set("targetYearMonth", targetYearMonth);
-  url.searchParams.set("role", role);
-
-  const response = await fetch(url.toString(), {
-    method: "GET"
+async function postJson(body) {
+  const response = await fetch(PMO_ADMIN_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
+    },
+    body: JSON.stringify(body)
   });
 
   if (!response.ok) {
-    throw new Error("管理情報の取得に失敗しました: " + response.status);
+    throw new Error("API通信に失敗しました: " + response.status);
   }
 
   return await response.json();
 }
 
-export async function fetchMonthlyExcel(targetYearMonth = "", role = "") {
-  const url = new URL(PMO_ADMIN_API_URL);
-  url.searchParams.set("action", "exportMonthlyExcel");
-  url.searchParams.set("targetYearMonth", targetYearMonth);
-  url.searchParams.set("role", role);
-
-  const response = await fetch(url.toString(), {
-    method: "GET"
+export async function fetchPmoAdminMeta(targetYearMonth = "", idToken = "") {
+  return await postJson({
+    action: "getPmoAdminMetaSecure",
+    targetYearMonth: targetYearMonth,
+    idToken: idToken
   });
-
-  if (!response.ok) {
-    throw new Error("Excel出力に失敗しました: " + response.status);
-  }
-
-  return await response.json();
 }
 
-export async function fetchPmoMonthlyTable(targetYearMonth = "", role = "") {
-  const url = new URL(PMO_ADMIN_API_URL);
-  url.searchParams.set("action", "getPmoMonthlyTable");
-  url.searchParams.set("targetYearMonth", targetYearMonth);
-  url.searchParams.set("role", role);
-
-  const response = await fetch(url.toString(), {
-    method: "GET"
+export async function fetchMonthlyExcel(targetYearMonth = "", idToken = "") {
+  return await postJson({
+    action: "exportMonthlyExcelSecure",
+    targetYearMonth: targetYearMonth,
+    idToken: idToken
   });
+}
 
-  if (!response.ok) {
-    throw new Error("一覧データの取得に失敗しました: " + response.status);
-  }
-
-  return await response.json();
+export async function fetchPmoMonthlyTable(targetYearMonth = "", idToken = "") {
+  return await postJson({
+    action: "getPmoMonthlyTableSecure",
+    targetYearMonth: targetYearMonth,
+    idToken: idToken
+  });
 }

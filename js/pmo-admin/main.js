@@ -1,5 +1,5 @@
 import { showLoading, hideLoading, waitForNextPaint } from "../common/loading.js";
-import { getQueryParams, buildCurrentUserFromQuery } from "./query.js";
+import { getQueryParams } from "./query.js";
 import {
   monthSelect,
   openMonthlyBtn,
@@ -28,20 +28,54 @@ import {
   fetchMonthlyExcel,
   fetchPmoMonthlyTable
 } from "./api.js";
+import { requireAuthenticatedCurrentUser } from "../common/auth-session.js";
 
 const params = getQueryParams();
-const currentUser = buildCurrentUserFromQuery(params);
-const canManage = canManagePmo(currentUser);
 
+let currentUser = null;
+let canManage = false;
 let currentMeta = null;
 
 setupShiftCoreEntryBanner(params);
-renderAccountInfo(currentUser);
-updateManageState(canManage, currentUser);
-renderEmptyTable("対象月を選択すると一覧を表示します。");
+renderEmptyTable("認証確認後に一覧を表示します。");
+
+async function initializePage() {
+  showLoading("認証確認中...");
+  await waitForNextPaint();
+
+  try {
+    const authResult = await requireAuthenticatedCurrentUser();
+
+    if (!authResult.ok) {
+      renderEmptyTable("認証確認に失敗しました。");
+      showMessage(authResult.message || "認証確認に失敗しました", "error");
+      return;
+    }
+
+    currentUser = authResult.user;
+    canManage = canManagePmo(currentUser);
+
+    renderAccountInfo(currentUser);
+    updateManageState(canManage, currentUser);
+
+    if (!canManage) {
+      renderEmptyTable("このアカウントには管理権限がありません。");
+      showMessage("このアカウントには管理権限がありません", "error");
+      return;
+    }
+
+    await loadMeta("");
+  } catch (error) {
+    console.error(error);
+    renderEmptyTable("認証確認に失敗しました。");
+    showMessage("認証確認に失敗しました", "error");
+  } finally {
+    hideLoading();
+  }
+}
 
 async function loadMeta(targetYearMonth = "") {
-  if (!canManage) {
+  if (!canManage || !currentUser) {
     showMessage("このアカウントには管理権限がありません", "error");
     return;
   }
@@ -81,7 +115,7 @@ async function loadMeta(targetYearMonth = "") {
 }
 
 async function loadMonthlyTable(targetYearMonth = "") {
-  if (!canManage) {
+  if (!canManage || !currentUser) {
     renderEmptyTable("このアカウントには管理権限がありません。");
     return;
   }
@@ -153,7 +187,7 @@ downloadCsvBtn.addEventListener("click", async () => {
     (currentMeta && currentMeta.selectedYearMonth) || monthSelect.value || ""
   ).trim();
 
-  if (!selectedYearMonth) {
+  if (!selectedYearMonth || !currentUser) {
     showMessage("対象月が選択されていません", "error");
     return;
   }
@@ -184,4 +218,4 @@ backToDashboardBtn.addEventListener("click", () => {
   goToDashboard();
 });
 
-await loadMeta("");
+await initializePage();

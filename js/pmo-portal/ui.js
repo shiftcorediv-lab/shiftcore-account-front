@@ -1,8 +1,7 @@
 import {
   userNameBox,
   employeeCodeBox,
-  accountMetaArea,
-  entryBannerArea,
+  developerMetaArea,
   messageBox,
   goManageBtn,
   manageHint
@@ -32,37 +31,28 @@ export function renderAccountInfo(currentUser) {
     currentUser.employeeCode || "社員コードを取得できませんでした",
     currentUser.employeeCode ? "success" : "error"
   );
-
-  accountMetaArea.innerHTML = "";
-
-  const roleBadge = document.createElement("span");
-  roleBadge.className = "badge";
-  roleBadge.textContent = "role: " + (currentUser.role || "未設定");
-
-  const workStatusBadge = document.createElement("span");
-  workStatusBadge.className = "badge";
-  workStatusBadge.textContent = "workStatus: " + (currentUser.workStatus || "未設定");
-
-  accountMetaArea.appendChild(roleBadge);
-  accountMetaArea.appendChild(workStatusBadge);
 }
 
-export function setupShiftCoreEntryBanner(params) {
-  if ((params.from || "") !== "shiftcore") return;
+export function renderDeveloperMeta(params, currentUser) {
+  const role = String(currentUser?.role || "").trim().toLowerCase();
 
-  const banner = document.createElement("div");
-  banner.style.margin = "0 auto 16px";
-  banner.style.padding = "12px 14px";
-  banner.style.borderRadius = "12px";
-  banner.style.background = "#eef3ff";
-  banner.style.border = "1px solid #cfdcff";
-  banner.style.fontSize = "14px";
-  banner.style.lineHeight = "1.6";
-  banner.innerHTML = `
-    <div><strong>ShiftCoreから移動しました</strong></div>
-    <div>module: ${params.module || "unknown"}</div>
+  if (role !== "developer") {
+    developerMetaArea.style.display = "none";
+    developerMetaArea.innerHTML = "";
+    return;
+  }
+
+  const moduleName = params?.module || "unknown";
+  const workStatus = currentUser?.workStatus || "未設定";
+
+  developerMetaArea.style.display = "block";
+  developerMetaArea.innerHTML = `
+    <div class="developer-meta-inner">
+      <span>ShiftCore &gt; ${moduleName}</span>
+      <span>role: ${role}</span>
+      <span>workStatus: ${workStatus}</span>
+    </div>
   `;
-  entryBannerArea.appendChild(banner);
 }
 
 export function updateManageButtonState(canManage) {

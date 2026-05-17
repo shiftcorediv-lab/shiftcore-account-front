@@ -46,12 +46,15 @@ async function loadMeta(targetYearMonth = "") {
     return;
   }
 
+  showLoading("管理情報を取得中...");
+  await waitForNextPaint();
   showMessage("管理情報を取得中...");
 
   try {
     const result = await fetchPmoAdminMeta(targetYearMonth, currentUser.role);
 
     if (!result.success) {
+      renderEmptyTable("管理情報の取得に失敗しました。");
       showMessage(result.message || "管理情報の取得に失敗しました", "error");
       return;
     }
@@ -60,15 +63,20 @@ async function loadMeta(targetYearMonth = "") {
     renderMonthOptions(result.months || [], result.selectedYearMonth || "");
     updateManageState(true, currentUser);
 
-    if (result.selectedYearMonth) {
-      await loadMonthlyTable(result.selectedYearMonth);
+    const effectiveYearMonth = result.selectedYearMonth || monthSelect.value || "";
+
+    if (effectiveYearMonth) {
+      await loadMonthlyTable(effectiveYearMonth);
     } else {
       renderEmptyTable("表示できる月がありません。");
       showMessage("管理情報を読み込みました", "success");
     }
   } catch (error) {
     console.error(error);
+    renderEmptyTable("管理情報の取得に失敗しました。");
     showMessage("管理情報の取得に失敗しました", "error");
+  } finally {
+    hideLoading();
   }
 }
 
@@ -82,9 +90,12 @@ async function loadMonthlyTable(targetYearMonth = "") {
 
   if (!selectedYearMonth) {
     renderEmptyTable("対象月を選択してください。");
+    showMessage("対象月が選択されていません", "error");
     return;
   }
 
+  showLoading("一覧を読み込み中...");
+  await waitForNextPaint();
   showMessage("一覧を更新中...");
 
   try {
@@ -106,6 +117,8 @@ async function loadMonthlyTable(targetYearMonth = "") {
     console.error(error);
     renderEmptyTable("一覧データの取得に失敗しました。");
     showMessage("一覧データの取得に失敗しました", "error");
+  } finally {
+    hideLoading();
   }
 }
 
@@ -145,6 +158,8 @@ downloadCsvBtn.addEventListener("click", async () => {
     return;
   }
 
+  showLoading("Excelを準備中...");
+  await waitForNextPaint();
   showMessage("Excelを生成中...");
 
   try {
@@ -160,6 +175,8 @@ downloadCsvBtn.addEventListener("click", async () => {
   } catch (error) {
     console.error(error);
     showMessage("Excel出力に失敗しました", "error");
+  } finally {
+    hideLoading();
   }
 });
 
@@ -168,9 +185,3 @@ backToDashboardBtn.addEventListener("click", () => {
 });
 
 await loadMeta("");
-
-
-showLoading("テスト中...");
-setTimeout(() => {
-  hideLoading();
-}, 1500);

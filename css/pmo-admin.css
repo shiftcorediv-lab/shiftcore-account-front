@@ -8,7 +8,7 @@ body {
 }
 
 .container {
-  max-width: 900px;
+  max-width: 760px;
   margin: 0 auto;
   padding: 16px;
 }
@@ -21,11 +21,19 @@ body {
   margin-bottom: 16px;
 }
 
+.card.compact-card {
+  padding: 16px;
+}
+
 h1 {
   margin: 0 0 16px;
   font-size: 28px;
   text-align: center;
   line-height: 1.4;
+}
+
+.card.compact-card h1 {
+  margin-bottom: 6px;
 }
 
 h2 {
@@ -38,6 +46,10 @@ h2 {
   color: #666;
   margin-bottom: 20px;
   font-size: 14px;
+}
+
+.card.compact-card .description {
+  margin-bottom: 10px;
 }
 
 label {
@@ -87,66 +99,25 @@ label {
   margin-bottom: 8px;
 }
 
-.hint {
-  font-size: 13px;
-  color: #666;
-  margin-top: 6px;
-  margin-bottom: 12px;
-}
-
-.list-area {
+.info-compact-grid {
   display: grid;
-  gap: 10px;
+  gap: 12px;
+  margin-top: 8px;
 }
 
-.request-item {
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 14px;
-  background: #fafafa;
+.info-compact-grid-3 {
+  grid-template-columns: 1.2fr 1fr 1fr;
 }
 
-.request-item-header {
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-
-.request-item-sub {
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 10px;
-  word-break: break-word;
-}
-
-.request-item button {
-  width: auto;
-  min-width: 120px;
-}
-
-.detail-grid {
-  display: grid;
-  gap: 10px;
-}
-
-.detail-row {
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  background: #fafafa;
-  padding: 12px;
-}
-
-.detail-label {
-  font-size: 13px;
-  color: #666;
+.info-compact-item label {
   margin-bottom: 6px;
-  font-weight: bold;
+  font-size: 13px;
 }
 
-.detail-value {
-  font-size: 14px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  word-break: break-word;
+.info-compact-item .info-box {
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 15px;
 }
 
 .select-box,
@@ -159,9 +130,13 @@ label {
   background: #fff;
 }
 
+.select-box {
+  margin-top: 4px;
+}
+
 .button-stack {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 button {
@@ -174,13 +149,13 @@ button {
   font-weight: bold;
 }
 
-.approve-btn {
-  background: #4caf50;
+.open-btn {
+  background: #5c6bc0;
   color: #fff;
 }
 
-.reject-btn {
-  background: #c62828;
+.csv-btn {
+  background: #3949ab;
   color: #fff;
 }
 
@@ -189,21 +164,17 @@ button {
   color: #fff;
 }
 
-.open-btn {
-  background: #5c6bc0;
-  color: #fff;
-}
-
-.csv-btn {
-  background: #3f51b5;
-  color: #fff;
-}
-
 button:disabled,
 select:disabled,
 input:disabled {
   opacity: .6;
   cursor: not-allowed;
+}
+
+.hint {
+  font-size: 13px;
+  color: #666;
+  margin-top: 8px;
 }
 
 .message {
@@ -216,104 +187,68 @@ input:disabled {
 .message.error { color: #c62828; }
 .message.success { color: #1b5e20; }
 
-/* =========================
-   PMO一覧テーブルここから
-   ========================= */
 .table-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  background: #fff;
+  margin-top: 8px;
 }
 
 .table-placeholder {
-  padding: 16px;
-  font-size: 14px;
+  border: 1px solid #d0d7de;
+  border-radius: 12px;
+  padding: 18px;
+  background: #fff;
   color: #666;
 }
 
 .spreadsheet-table-wrap {
-  width: max-content;
-  min-width: 100%;
+  overflow-x: auto;
+  border: 1px solid #d0d7de;
+  border-radius: 12px;
+  background: #fff;
 }
 
 .spreadsheet-table {
+  width: 100%;
   border-collapse: collapse;
-  width: max-content;
-  min-width: 100%;
-  table-layout: auto;
-  background: #fff;
+  min-width: 720px;
+  font-size: 14px;
 }
 
 .spreadsheet-table th,
 .spreadsheet-table td {
   border-bottom: 1px solid #e5e7eb;
-  border-right: 1px solid #eef2f7;
   padding: 10px 12px;
-  font-size: 14px;
-  line-height: 1.5;
-  vertical-align: middle;
   text-align: center;
   white-space: nowrap;
-  word-break: keep-all;
 }
 
-.spreadsheet-table thead th {
+.spreadsheet-table th {
+  background: #f8fafc;
+  font-weight: bold;
   position: sticky;
   top: 0;
   z-index: 1;
-  background: #f7f8fb;
-  font-weight: bold;
 }
 
-.spreadsheet-table tbody tr:nth-child(even) {
-  background: #fafbfc;
-}
-
-.spreadsheet-table tbody tr:hover {
-  background: #f3f6ff;
-}
-
-/* 提出状況 */
+.spreadsheet-table td:nth-child(1),
+.spreadsheet-table td:nth-child(2),
+.spreadsheet-table td:nth-child(3),
+.spreadsheet-table td:nth-child(4),
 .spreadsheet-table th:nth-child(1),
-.spreadsheet-table td:nth-child(1) {
-  min-width: 110px;
-}
-
-/* スタッフ名 */
 .spreadsheet-table th:nth-child(2),
-.spreadsheet-table td:nth-child(2) {
-  min-width: 140px;
-  text-align: left;
-  white-space: normal;
-  word-break: break-word;
-}
-
-/* employee_code */
 .spreadsheet-table th:nth-child(3),
-.spreadsheet-table td:nth-child(3) {
-  min-width: 120px;
-}
-
-/* メモ列（新形式の月のみ自然に効く） */
-.spreadsheet-table th:nth-child(4),
-.spreadsheet-table td:nth-child(4) {
-  min-width: 180px;
-  max-width: 260px;
+.spreadsheet-table th:nth-child(4) {
   text-align: left;
-  white-space: normal;
-  word-break: break-word;
 }
 
-/* 日付列 */
-.spreadsheet-table th:nth-child(n+5),
-.spreadsheet-table td:nth-child(n+5) {
-  min-width: 48px;
+.spreadsheet-table tr:last-child td {
+  border-bottom: none;
 }
-/* =========================
-   PMO一覧テーブルここまで
-   ========================= */
+
+@media (max-width: 760px) {
+  .info-compact-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
 
 @media (max-width: 480px) {
   h1 {
@@ -323,37 +258,5 @@ input:disabled {
   .card {
     padding: 16px;
     border-radius: 14px;
-  }
-
-  .spreadsheet-table th,
-  .spreadsheet-table td {
-    padding: 8px 10px;
-    font-size: 13px;
-  }
-
-  .spreadsheet-table th:nth-child(1),
-  .spreadsheet-table td:nth-child(1) {
-    min-width: 96px;
-  }
-
-  .spreadsheet-table th:nth-child(2),
-  .spreadsheet-table td:nth-child(2) {
-    min-width: 120px;
-  }
-
-  .spreadsheet-table th:nth-child(3),
-  .spreadsheet-table td:nth-child(3) {
-    min-width: 104px;
-  }
-
-  .spreadsheet-table th:nth-child(4),
-  .spreadsheet-table td:nth-child(4) {
-    min-width: 150px;
-    max-width: 220px;
-  }
-
-  .spreadsheet-table th:nth-child(n+5),
-  .spreadsheet-table td:nth-child(n+5) {
-    min-width: 44px;
   }
 }

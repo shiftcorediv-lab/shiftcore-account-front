@@ -1,13 +1,13 @@
 import { getQueryParams, buildCurrentUserFromQuery } from "./query.js";
 import { goApplyBtn, goManageBtn, backToDashboardBtn } from "./dom.js";
-import { renderAccountInfo, setupShiftCoreEntryBanner, updateManageButtonState, showMessage } from "./ui.js";
+import { renderAccountInfo, renderDeveloperMeta, updateManageButtonState, showMessage } from "./ui.js";
 import { buildPmoApplyUrl, buildPmoAdminUrl, canManagePmo, goToDashboard } from "./navigation.js";
 
 const params = getQueryParams();
 const currentUser = buildCurrentUserFromQuery(params);
 
-setupShiftCoreEntryBanner(params);
 renderAccountInfo(currentUser);
+renderDeveloperMeta(params, currentUser);
 
 const canManage = canManagePmo(currentUser);
 updateManageButtonState(canManage);

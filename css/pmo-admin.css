@@ -25,6 +25,10 @@ body {
   padding: 16px;
 }
 
+.compact-action-card {
+  padding: 18px;
+}
+
 h1 {
   margin: 0 0 16px;
   font-size: 28px;
@@ -244,8 +248,47 @@ input:disabled {
   border-bottom: none;
 }
 
+.action-control-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr);
+  gap: 16px;
+  align-items: end;
+  margin-top: 8px;
+}
+
+.action-control-main .hint {
+  margin-top: 8px;
+}
+
+.action-control-buttons {
+  display: grid;
+  gap: 10px;
+}
+
+.action-control-buttons button {
+  min-height: 52px;
+}
+
+.compact-action-card .message {
+  margin-top: 10px;
+}
+
 @media (max-width: 760px) {
   .info-compact-grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .action-control-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-control-buttons {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .action-control-buttons {
     grid-template-columns: 1fr;
   }
 }

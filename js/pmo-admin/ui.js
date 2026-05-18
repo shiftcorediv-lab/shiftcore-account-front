@@ -147,12 +147,20 @@ function createCell(text, tagName = "td") {
   return cell;
 }
 
+function normalizeTableHeaderLabel(header) {
+  const value = String(header || "").trim();
+
+  if (value === "employee_code") return "社員番号";
+
+  return value;
+}
+
 function createTableHeader(headers) {
   const thead = document.createElement("thead");
   const row = document.createElement("tr");
 
   headers.forEach((header) => {
-    row.appendChild(createCell(header, "th"));
+    row.appendChild(createCell(normalizeTableHeaderLabel(header), "th"));
   });
 
   thead.appendChild(row);

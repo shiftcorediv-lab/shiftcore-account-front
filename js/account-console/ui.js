@@ -9,14 +9,20 @@ import {
   selectedUserIdText,
   internalUserIdInput,
   nameInput,
+  displayNameInput,
   employeeCodeInput,
   emailInput,
+  phoneInput,
   roleInput,
   organizationInput,
+  departmentInput,
+  positionInput,
+  baseAreaInput,
   statusInput,
   workStatusInput,
   sortOrderInput,
   ordercasePermissionInput,
+  memoInput,
   authProviderText,
   authUidText,
   createdAtText,
@@ -77,13 +83,19 @@ export function filterUsers(users, keyword) {
   return users.filter((user) => {
     const haystack = [
       user.name,
+      user.display_name,
       user.employee_code,
       user.email,
+      user.phone,
       user.role,
       user.organization_id,
+      user.department,
+      user.position,
+      user.base_area,
       user.status,
       user.allowed_modules,
-      user.ordercase_permission
+      user.ordercase_permission,
+      user.memo
     ].map((value) => text(value).toLowerCase()).join(" ");
 
     return haystack.includes(q);
@@ -99,7 +111,7 @@ export function renderUsers(users, selectedUserId, onSelectUser) {
   if (!users.length) {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
-    td.colSpan = 8;
+    td.colSpan = 10;
     td.textContent = "表示できるユーザーがいません";
     tr.appendChild(td);
     userTableBody.appendChild(tr);
@@ -114,10 +126,12 @@ export function renderUsers(users, selectedUserId, onSelectUser) {
     }
 
     tr.appendChild(makeTd(user.name));
+    tr.appendChild(makeTd(user.display_name));
     tr.appendChild(makeTd(user.employee_code));
     tr.appendChild(makeTd(user.email));
-    tr.appendChild(makeTd(user.role));
-    tr.appendChild(makeTd(user.organization_id));
+    tr.appendChild(makeTd(user.department));
+    tr.appendChild(makeTd(user.position));
+    tr.appendChild(makeTd(user.base_area));
 
     const statusTd = document.createElement("td");
     const pill = document.createElement("span");
@@ -156,14 +170,20 @@ export function clearUserForm() {
 
   internalUserIdInput.value = "";
   nameInput.value = "";
+  displayNameInput.value = "";
   employeeCodeInput.value = "";
   emailInput.value = "";
+  phoneInput.value = "";
   roleInput.value = "member";
   organizationInput.value = "";
+  departmentInput.value = "";
+  positionInput.value = "";
+  baseAreaInput.value = "";
   statusInput.value = "active";
   workStatusInput.value = "off";
   sortOrderInput.value = "";
   ordercasePermissionInput.value = "";
+  memoInput.value = "";
 
   document.querySelectorAll("input[name='module']").forEach((checkbox) => {
     checkbox.checked = false;
@@ -182,14 +202,20 @@ export function fillUserForm(user) {
 
   internalUserIdInput.value = text(user.internal_user_id);
   nameInput.value = text(user.name);
+  displayNameInput.value = text(user.display_name);
   employeeCodeInput.value = text(user.employee_code);
   emailInput.value = text(user.email);
+  phoneInput.value = text(user.phone);
   roleInput.value = text(user.role) || "member";
   organizationInput.value = text(user.organization_id);
+  departmentInput.value = text(user.department);
+  positionInput.value = text(user.position);
+  baseAreaInput.value = text(user.base_area);
   statusInput.value = text(user.status) || "active";
   workStatusInput.value = text(user.workStatus) || "off";
   sortOrderInput.value = text(user.sortOrder);
   ordercasePermissionInput.value = text(user.ordercase_permission);
+  memoInput.value = text(user.memo);
 
   const modules = text(user.allowed_modules)
     .split(",")
@@ -214,15 +240,21 @@ export function collectUserForm() {
   return {
     internal_user_id: text(internalUserIdInput.value),
     name: text(nameInput.value),
+    display_name: text(displayNameInput.value),
     employee_code: text(employeeCodeInput.value),
     email: text(emailInput.value),
+    phone: text(phoneInput.value),
     role: text(roleInput.value),
     organization_id: text(organizationInput.value),
+    department: text(departmentInput.value),
+    position: text(positionInput.value),
+    base_area: text(baseAreaInput.value),
     status: text(statusInput.value),
     workStatus: text(workStatusInput.value),
     sortOrder: text(sortOrderInput.value),
     allowed_modules: modules.join(","),
-    ordercase_permission: text(ordercasePermissionInput.value)
+    ordercase_permission: text(ordercasePermissionInput.value),
+    memo: text(memoInput.value)
   };
 }
 // ===== フォーム操作ここまで =====

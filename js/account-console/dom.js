@@ -1,6 +1,7 @@
 // ===== DOM取得ここから =====
 export const operatorText = document.getElementById("operatorText");
 export const permissionBadge = document.getElementById("permissionBadge");
+export const currentUserPermissionText = document.getElementById("currentUserPermissionText");
 
 export const dashboardBtn = document.getElementById("dashboardBtn");
 export const signupAdminBtn = document.getElementById("signupAdminBtn");

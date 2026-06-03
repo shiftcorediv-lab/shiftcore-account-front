@@ -1,4 +1,4 @@
-import { ACCOUNT_PORTAL_URL, SIGNUP_ADMIN_ALLOWED_ROLES } from "./config.js";
+import { ACCOUNT_CONSOLE_URL, ACCOUNT_PORTAL_URL, SIGNUP_ADMIN_ALLOWED_ROLES } from "./config.js";
 
 export function canUseSignupAdmin(currentUser) {
   const role = String(currentUser?.role || "").trim().toLowerCase();
@@ -20,7 +20,7 @@ export function canUseSignupAdmin(currentUser) {
 }
 
 export function buildAccountPortalUrl(currentUser) {
-  const targetUrl = new URL(ACCOUNT_PORTAL_URL, window.location.href);
+  const targetUrl = new URL(ACCOUNT_CONSOLE_URL || ACCOUNT_PORTAL_URL, window.location.href);
 
   targetUrl.searchParams.set("from", "shiftcore");
   targetUrl.searchParams.set("module", "account");

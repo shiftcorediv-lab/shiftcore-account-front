@@ -29,7 +29,7 @@
     </section>
 
     <section class="toolbar">
-      <input id="searchInput" type="search" placeholder="氏名 / メール / 社員番号 / 所属 / 権限で検索">
+      <input id="searchInput" type="search" placeholder="氏名 / 表示名 / メール / 社員番号 / 所属 / 部署 / 役職 / エリア / 権限で検索">
       <button id="newUserBtn" class="primary-button">ユーザー追加</button>
       <button id="reloadBtn" class="secondary-button">再読み込み</button>
     </section>
@@ -53,7 +53,7 @@
       <section class="panel user-panel">
         <div class="panel-header">
           <h2>ユーザー名簿</h2>
-          <span class="hint">行を選ぶと右側で編集できます</span>
+          <span class="hint">社員番号 AN0000 は一覧非表示</span>
         </div>
 
         <div class="table-wrap">
@@ -61,10 +61,12 @@
             <thead>
               <tr>
                 <th>氏名</th>
+                <th>表示名</th>
                 <th>社員番号</th>
                 <th>メール</th>
-                <th>ロール</th>
-                <th>所属</th>
+                <th>部署</th>
+                <th>役職</th>
+                <th>担当エリア</th>
                 <th>状態</th>
                 <th>利用機能</th>
                 <th>OrderCase</th>
@@ -90,6 +92,11 @@
           </label>
 
           <label>
+            表示名
+            <input id="displayNameInput" type="text" autocomplete="off" placeholder="画面表示用の名前">
+          </label>
+
+          <label>
             社員番号
             <input id="employeeCodeInput" type="text" autocomplete="off">
           </label>
@@ -97,6 +104,11 @@
           <label>
             メール
             <input id="emailInput" type="email" autocomplete="off">
+          </label>
+
+          <label>
+            電話番号
+            <input id="phoneInput" type="tel" autocomplete="off">
           </label>
 
           <label>
@@ -109,8 +121,23 @@
           </label>
 
           <label>
-            所属
+            所属ID
             <input id="organizationInput" type="text" autocomplete="off">
+          </label>
+
+          <label>
+            部署
+            <input id="departmentInput" type="text" autocomplete="off">
+          </label>
+
+          <label>
+            役職
+            <input id="positionInput" type="text" autocomplete="off">
+          </label>
+
+          <label>
+            担当エリア
+            <input id="baseAreaInput" type="text" autocomplete="off" placeholder="例：関西 / 東海 / 関東">
           </label>
 
           <label>
@@ -171,6 +198,11 @@
               <option value="view">view</option>
               <option value="view_without_amount">view_without_amount</option>
             </select>
+          </label>
+
+          <label>
+            メモ
+            <textarea id="memoInput" rows="4" placeholder="補足メモ"></textarea>
           </label>
 
           <div class="readonly-box">

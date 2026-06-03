@@ -21,14 +21,20 @@ export const userForm = document.getElementById("userForm");
 
 export const internalUserIdInput = document.getElementById("internalUserIdInput");
 export const nameInput = document.getElementById("nameInput");
+export const displayNameInput = document.getElementById("displayNameInput");
 export const employeeCodeInput = document.getElementById("employeeCodeInput");
 export const emailInput = document.getElementById("emailInput");
+export const phoneInput = document.getElementById("phoneInput");
 export const roleInput = document.getElementById("roleInput");
 export const organizationInput = document.getElementById("organizationInput");
+export const departmentInput = document.getElementById("departmentInput");
+export const positionInput = document.getElementById("positionInput");
+export const baseAreaInput = document.getElementById("baseAreaInput");
 export const statusInput = document.getElementById("statusInput");
 export const workStatusInput = document.getElementById("workStatusInput");
 export const sortOrderInput = document.getElementById("sortOrderInput");
 export const ordercasePermissionInput = document.getElementById("ordercasePermissionInput");
+export const memoInput = document.getElementById("memoInput");
 
 export const authProviderText = document.getElementById("authProviderText");
 export const authUidText = document.getElementById("authUidText");

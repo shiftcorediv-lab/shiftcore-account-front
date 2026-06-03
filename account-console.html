@@ -28,6 +28,13 @@
       <div id="permissionBadge" class="badge">権限確認中</div>
     </section>
 
+    <section class="operator-card" id="currentUserPermissionCard">
+  <div>
+    <div class="label">現在ログイン中ユーザーの権限</div>
+    <div id="currentUserPermissionText" class="operator-text">確認中...</div>
+  </div>
+</section>
+
     <section class="toolbar">
       <input id="searchInput" type="search" placeholder="氏名 / 表示名 / メール / 社員番号 / 所属 / 部署 / 役職 / エリア / 権限で検索">
       <button id="newUserBtn" class="primary-button">ユーザー追加</button>
@@ -51,10 +58,9 @@
 
     <main class="content-grid">
       <section class="panel user-panel">
-        <div class="panel-header">
-          <h2>ユーザー名簿</h2>
-          <span class="hint">社員番号 AN0000 は一覧非表示</span>
-        </div>
+       <div class="panel-header">
+  <h2>ユーザー名簿</h2>
+</div>
 
         <div class="table-wrap">
           <table>

@@ -37,6 +37,7 @@ let session = null;
 let idToken = "";
 let allUsers = [];
 let selectedUser = null;
+let currentUser = null;
 // ===== 状態ここまで =====
 
 
@@ -65,6 +66,7 @@ async function init() {
 
     setOperator(currentResult.user);
     renderCurrentUserPermission(currentResult.user);
+    currentUser = currentResult.user;
 
     await loadUsers();
     await loadLogs();

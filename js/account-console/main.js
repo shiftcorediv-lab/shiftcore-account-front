@@ -22,6 +22,7 @@ import {
   setStatus,
   setOperator,
   setPermissionError,
+  renderCurrentUserPermission,
   filterUsers,
   renderUsers,
   renderSummary,
@@ -63,6 +64,7 @@ async function init() {
     }
 
     setOperator(currentResult.user);
+    renderCurrentUserPermission(currentResult.user);
 
     await loadUsers();
     await loadLogs();

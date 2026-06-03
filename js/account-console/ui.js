@@ -48,6 +48,22 @@ export function setPermissionError(message) {
   permissionBadge.textContent = "権限なし";
   permissionBadge.className = "badge ng";
   operatorText.textContent = message;
+
+  if (currentUserPermissionText) {
+    currentUserPermissionText.textContent = "-";
+  }
+}
+
+export function renderCurrentUserPermission(user) {
+  if (!currentUserPermissionText) {
+    return;
+  }
+
+  const modules = modulesText(user.allowed_modules);
+  const ordercasePermission = text(user.ordercase_permission) || "なし";
+
+  currentUserPermissionText.textContent =
+    `role: ${text(user.role) || "-"} / status: ${text(user.status) || "-"} / allowed_modules: ${modules || "-"} / OrderCase: ${ordercasePermission}`;
 }
 // ===== 状態表示ここまで =====
 

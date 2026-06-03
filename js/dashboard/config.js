@@ -12,6 +12,7 @@ export const PMO_V2_URL = "https://shiftcorediv-lab.github.io/pickmyoff_v2_front
 
 export const MODULE_NAME_MAP = {
   account: "アカウント基盤",
+  account_console: "Account Console",
   pmo: "希望休回収 / PMO",
   shift: "シフト作成 / 公開"
 };

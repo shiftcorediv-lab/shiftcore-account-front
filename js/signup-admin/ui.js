@@ -42,19 +42,19 @@ export function renderAccountInfo(currentUser) {
 
   setInfoBox(
     employeeCodeBox,
-    currentUser.employeeCode || "社員コードを取得できませんでした",
+    currentUser.employeeCode || "社員番号を取得できませんでした",
     currentUser.employeeCode ? "success" : "error"
   );
 
   accountMetaArea.innerHTML = "";
 
-  const roleBadge = document.createElement("span");
-  roleBadge.className = "badge";
-  roleBadge.textContent = "role: " + (currentUser.role || "未設定");
+const roleBadge = document.createElement("span");
+roleBadge.className = "badge";
+roleBadge.textContent = "権限ロール：" + (currentUser.role || "未設定");
 
-  const workStatusBadge = document.createElement("span");
-  workStatusBadge.className = "badge";
-  workStatusBadge.textContent = "workStatus: " + (currentUser.workStatus || "未設定");
+const workStatusBadge = document.createElement("span");
+workStatusBadge.className = "badge";
+workStatusBadge.textContent = "稼働状態：" + (currentUser.workStatus || "未設定");
 
   accountMetaArea.appendChild(roleBadge);
   accountMetaArea.appendChild(workStatusBadge);
@@ -72,9 +72,8 @@ export function setupShiftCoreEntryBanner(params) {
   banner.style.fontSize = "14px";
   banner.style.lineHeight = "1.6";
   banner.innerHTML = `
-    <div><strong>ShiftCoreから移動しました</strong></div>
-    <div>module: ${params.module || "unknown"}</div>
-  `;
+  <div><strong>Account Consoleから移動しました</strong></div>
+`;
   entryBannerArea.appendChild(banner);
 }
 

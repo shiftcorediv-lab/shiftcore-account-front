@@ -1,6 +1,7 @@
 import {
   operatorText,
   permissionBadge,
+  currentUserPermissionText,
   visibleCountText,
   totalCountText,
   statusSummaryText,

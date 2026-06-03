@@ -2,7 +2,21 @@ import { ACCOUNT_PORTAL_URL, SIGNUP_ADMIN_ALLOWED_ROLES } from "./config.js";
 
 export function canUseSignupAdmin(currentUser) {
   const role = String(currentUser?.role || "").trim().toLowerCase();
-  return SIGNUP_ADMIN_ALLOWED_ROLES.includes(role);
+
+  if (SIGNUP_ADMIN_ALLOWED_ROLES.includes(role)) {
+    return true;
+  }
+
+  const modules = String(
+    currentUser?.allowed_modules ||
+    currentUser?.allowedModules ||
+    ""
+  )
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  return modules.includes("account_console");
 }
 
 export function buildAccountPortalUrl(currentUser) {

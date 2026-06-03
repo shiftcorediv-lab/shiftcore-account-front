@@ -2,8 +2,8 @@ import { LOGIN_PAGE_URL, PMO_V2_URL } from "./config.js";
 import { getStoredUser } from "./storage.js";
 
 const PMO_PORTAL_URL = "./pmo-portal.html";
-const ACCOUNT_PORTAL_URL = "./account-portal.html";
-const PMO_PORTAL_ROLES = ["admin", "developer"];
+const ACCOUNT_CONSOLE_URL = "./account-console.html";
+const PMO_PORTAL_ROLES = ["admin", "developer", "dev"];
 
 export function goToLogin() {
   window.location.href = LOGIN_PAGE_URL;
@@ -37,8 +37,8 @@ export function buildPmoPortalUrl(storedUser) {
   return targetUrl.toString();
 }
 
-export function buildAccountPortalUrl(storedUser) {
-  const targetUrl = new URL(ACCOUNT_PORTAL_URL, window.location.href);
+export function buildAccountConsoleUrl(storedUser) {
+  const targetUrl = new URL(ACCOUNT_CONSOLE_URL, window.location.href);
 
   targetUrl.searchParams.set("from", "shiftcore");
   targetUrl.searchParams.set("module", "account");
@@ -79,8 +79,8 @@ export function openModule(moduleCode, setStatus) {
     return;
   }
 
-  if (moduleCode === "account") {
-    window.location.href = buildAccountPortalUrl(storedUser);
+  if (moduleCode === "account" || moduleCode === "account_console") {
+    window.location.href = buildAccountConsoleUrl(storedUser);
     return;
   }
 

@@ -36,7 +36,7 @@ setActionButtonsEnabled(false);
 
 async function loadRequests() {
   if (!canUse) {
-    showMessage("このアカウントには利用権限がありません", "error");
+    showMessage("このアカウントには登録申請管理の利用権限がありません", "error");
     return;
   }
 

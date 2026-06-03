@@ -64,9 +64,9 @@ async function init() {
       return;
     }
 
+    currentUser = currentResult.user;
     setOperator(currentResult.user);
     renderCurrentUserPermission(currentResult.user);
-    currentUser = currentResult.user;
 
     await loadUsers();
     await loadLogs();
@@ -198,7 +198,17 @@ dashboardBtn.addEventListener("click", () => {
 });
 
 signupAdminBtn.addEventListener("click", () => {
-  window.location.href = SIGNUP_ADMIN_URL;
+  const url = new URL(SIGNUP_ADMIN_URL, window.location.href);
+
+  url.searchParams.set("from", "shiftcore");
+  url.searchParams.set("module", "account");
+  url.searchParams.set("userId", currentUser?.internal_user_id || currentUser?.userId || "");
+  url.searchParams.set("displayName", currentUser?.displayName || currentUser?.display_name || currentUser?.name || "");
+  url.searchParams.set("employeeCode", currentUser?.employeeCode || currentUser?.employee_code || "");
+  url.searchParams.set("role", currentUser?.role || "");
+  url.searchParams.set("workStatus", currentUser?.workStatus || currentUser?.work_status || "");
+
+  window.location.href = url.toString();
 });
 
 reloadBtn.addEventListener("click", async () => {

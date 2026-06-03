@@ -6,18 +6,37 @@ function canShowModule(moduleCode, user) {
   const role = String(user?.role || "").trim().toLowerCase();
 
   if (moduleCode === "account") {
-    return role === "admin" || role === "developer";
+    return role === "admin" || role === "developer" || role === "dev";
+  }
+
+  if (moduleCode === "account_console") {
+    return false;
   }
 
   return true;
 }
 
+function normalizeVisibleModules(modules) {
+  if (!Array.isArray(modules)) {
+    return [];
+  }
+
+  const uniqueModules = [];
+
+  modules.forEach((moduleCode) => {
+    if (!uniqueModules.includes(moduleCode)) {
+      uniqueModules.push(moduleCode);
+    }
+  });
+
+  return uniqueModules;
+}
+
 export function renderModules(modules, user, setStatus) {
   moduleList.innerHTML = "";
 
-  const visibleModules = Array.isArray(modules)
-    ? modules.filter((moduleCode) => canShowModule(moduleCode, user))
-    : [];
+  const visibleModules = normalizeVisibleModules(modules)
+    .filter((moduleCode) => canShowModule(moduleCode, user));
 
   if (visibleModules.length === 0) {
     moduleList.innerHTML = "<div class='module-card'><div class='module-card-title'>利用可能モジュールなし</div></div>";
@@ -38,7 +57,7 @@ export function renderModules(modules, user, setStatus) {
 
     const button = document.createElement("button");
 
-    if (moduleCode === "pmo" || moduleCode === "account") {
+    if (moduleCode === "pmo" || moduleCode === "account" || moduleCode === "account_console") {
       button.textContent = "開く";
       button.addEventListener("click", () => openModule(moduleCode, setStatus));
     } else {

@@ -33,13 +33,90 @@ import {
   statusBox
 } from "./dom.js";
 
+
+// ===== 表示ラベル定義ここから =====
+const ROLE_LABELS = {
+  member: "弊社内人員",
+  employee: "弊社内人員",
+  internal: "弊社内人員",
+  admin: "管理者",
+  dev: "開発管理者",
+  developer: "開発管理者",
+  partner_individual: "アライアンス個人",
+  alliance_individual: "アライアンス個人",
+  partner_company: "アライアンス法人",
+  partner_company_admin: "アライアンス法人 管理者",
+  alliance_company: "アライアンス法人",
+  alliance_company_admin: "アライアンス法人 管理者",
+  agency: "代理店"
+};
+
+const STATUS_LABELS = {
+  active: "有効",
+  inactive: "停止",
+  pending: "確認待ち",
+  pending_approval: "承認待ち"
+};
+
+const WORK_STATUS_LABELS = {
+  on: "稼働対象",
+  off: "稼働対象外",
+  active: "稼働対象",
+  inactive: "稼働対象外",
+  available: "稼働対象",
+  unavailable: "稼働対象外"
+};
+
+const MODULE_LABELS = {
+  account: "アカウント基盤",
+  account_console: "Account Console",
+  pmo: "希望休 / 稼働不可日申請",
+  ordercase: "OrderCase",
+  manual: "取扱説明書",
+  shift: "ShiftBuilder",
+  dashboard: "Dashboard"
+};
+
+const ORDERCASE_PERMISSION_LABELS = {
+  all: "全操作可能",
+  edit: "登録・編集可能",
+  view: "閲覧のみ 金額表示あり",
+  view_without_amount: "閲覧のみ 金額非表示"
+};
+
+const FIELD_LABELS = {
+  internal_user_id: "内部ユーザーID",
+  name: "氏名 / 登録名",
+  display_name: "表示名",
+  employee_code: "アカウントコード",
+  email: "メール",
+  phone: "電話番号",
+  role: "アカウント種別",
+  organization_id: "所属ID / 所属名",
+  department: "部署",
+  position: "役職",
+  base_area: "担当エリア",
+  status: "アカウント状態",
+  work_status: "稼働対象状態",
+  workStatus: "稼働対象状態",
+  sort_order: "並び順",
+  sortOrder: "並び順",
+  allowed_modules: "利用可能機能",
+  ordercase_permission: "OrderCase権限",
+  memo: "メモ",
+  auth_provider: "認証プロバイダ",
+  auth_uid: "認証UID"
+};
+// ===== 表示ラベル定義ここまで =====
+
+
 // ===== 状態表示ここから =====
 export function setStatus(message) {
   statusBox.textContent = message;
 }
 
 export function setOperator(user) {
-  operatorText.textContent = `${user.name || "-"} / ${user.email || "-"}`;
+  operatorText.textContent = `${user.name || user.display_name || "-"} / ${user.email || "-"}`;
   permissionBadge.textContent = "Account Console 使用可";
   permissionBadge.className = "badge ok";
 }
@@ -59,11 +136,14 @@ export function renderCurrentUserPermission(user) {
     return;
   }
 
-  const modules = modulesText(user.allowed_modules);
-  const ordercasePermission = text(user.ordercase_permission) || "なし";
+  const modules = modulesTextForDisplay(user.allowed_modules);
+  const ordercasePermission = labelFromMap(user.ordercase_permission, ORDERCASE_PERMISSION_LABELS, "なし");
+  const role = labelFromMap(user.role, ROLE_LABELS, "-");
+  const status = labelFromMap(user.status, STATUS_LABELS, "-");
+  const workStatus = labelFromMap(user.work_status || user.workStatus, WORK_STATUS_LABELS, "-");
 
   currentUserPermissionText.textContent =
-    `role: ${text(user.role) || "-"} / status: ${text(user.status) || "-"} / allowed_modules: ${modules || "-"} / OrderCase: ${ordercasePermission}`;
+    `アカウント種別：${role} / アカウント状態：${status} / 稼働対象状態：${workStatus} / 利用可能機能：${modules || "-"} / OrderCase：${ordercasePermission}`;
 }
 // ===== 状態表示ここまで =====
 
@@ -73,12 +153,62 @@ function text(value) {
   return String(value == null ? "" : value).trim();
 }
 
-function modulesText(value) {
+function labelFromMap(value, map, fallback = "未設定") {
+  const key = text(value);
+
+  if (!key) {
+    return fallback;
+  }
+
+  return map[key] || key;
+}
+
+function modulesArray(value) {
   return text(value)
     .split(",")
     .map((item) => item.trim())
-    .filter((item) => item !== "")
+    .filter((item) => item !== "");
+}
+
+function modulesText(value) {
+  return modulesArray(value).join(", ");
+}
+
+function modulesTextForDisplay(value) {
+  return modulesArray(value)
+    .map((item) => MODULE_LABELS[item] || item)
     .join(", ");
+}
+
+function displayValueByField(field, value) {
+  const key = text(field);
+  const raw = text(value);
+
+  if (!raw) {
+    return "";
+  }
+
+  if (key === "role") {
+    return labelFromMap(raw, ROLE_LABELS, raw);
+  }
+
+  if (key === "status") {
+    return labelFromMap(raw, STATUS_LABELS, raw);
+  }
+
+  if (key === "work_status" || key === "workStatus") {
+    return labelFromMap(raw, WORK_STATUS_LABELS, raw);
+  }
+
+  if (key === "allowed_modules") {
+    return modulesTextForDisplay(raw);
+  }
+
+  if (key === "ordercase_permission") {
+    return labelFromMap(raw, ORDERCASE_PERMISSION_LABELS, raw);
+  }
+
+  return raw;
 }
 
 function makeTd(value) {
@@ -105,13 +235,20 @@ export function filterUsers(users, keyword) {
       user.email,
       user.phone,
       user.role,
+      labelFromMap(user.role, ROLE_LABELS, ""),
       user.organization_id,
       user.department,
       user.position,
       user.base_area,
       user.status,
+      labelFromMap(user.status, STATUS_LABELS, ""),
+      user.work_status,
+      user.workStatus,
+      labelFromMap(user.work_status || user.workStatus, WORK_STATUS_LABELS, ""),
       user.allowed_modules,
+      modulesTextForDisplay(user.allowed_modules),
       user.ordercase_permission,
+      labelFromMap(user.ordercase_permission, ORDERCASE_PERMISSION_LABELS, ""),
       user.memo
     ].map((value) => text(value).toLowerCase()).join(" ");
 
@@ -128,8 +265,8 @@ export function renderUsers(users, selectedUserId, onSelectUser) {
   if (!users.length) {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
-    td.colSpan = 10;
-    td.textContent = "表示できるユーザーがいません";
+    td.colSpan = 11;
+    td.textContent = "表示できるアカウントがありません";
     tr.appendChild(td);
     userTableBody.appendChild(tr);
     return;
@@ -146,6 +283,7 @@ export function renderUsers(users, selectedUserId, onSelectUser) {
     tr.appendChild(makeTd(user.display_name));
     tr.appendChild(makeTd(user.employee_code));
     tr.appendChild(makeTd(user.email));
+    tr.appendChild(makeTd(labelFromMap(user.role, ROLE_LABELS, "-")));
     tr.appendChild(makeTd(user.department));
     tr.appendChild(makeTd(user.position));
     tr.appendChild(makeTd(user.base_area));
@@ -153,12 +291,12 @@ export function renderUsers(users, selectedUserId, onSelectUser) {
     const statusTd = document.createElement("td");
     const pill = document.createElement("span");
     pill.className = "status-pill " + text(user.status).toLowerCase();
-    pill.textContent = text(user.status) || "-";
+    pill.textContent = labelFromMap(user.status, STATUS_LABELS, "-");
     statusTd.appendChild(pill);
     tr.appendChild(statusTd);
 
-    tr.appendChild(makeTd(modulesText(user.allowed_modules)));
-    tr.appendChild(makeTd(user.ordercase_permission));
+    tr.appendChild(makeTd(modulesTextForDisplay(user.allowed_modules)));
+    tr.appendChild(makeTd(labelFromMap(user.ordercase_permission, ORDERCASE_PERMISSION_LABELS, "なし")));
 
     tr.addEventListener("click", () => onSelectUser(user));
     userTableBody.appendChild(tr);
@@ -175,14 +313,14 @@ export function renderSummary(filteredUsers, allUsers) {
   const activeCount = allUsers.filter((user) => text(user.status) === "active").length;
   const inactiveCount = allUsers.filter((user) => text(user.status) === "inactive").length;
 
-  statusSummaryText.textContent = `active ${activeCount} / inactive ${inactiveCount}`;
+  statusSummaryText.textContent = `有効 ${activeCount} / 停止 ${inactiveCount}`;
 }
 // ===== 集計表示ここまで =====
 
 
 // ===== フォーム操作ここから =====
 export function clearUserForm() {
-  editorTitle.textContent = "ユーザー追加";
+  editorTitle.textContent = "アカウント追加";
   selectedUserIdText.textContent = "新規作成";
 
   internalUserIdInput.value = "";
@@ -214,7 +352,7 @@ export function clearUserForm() {
 }
 
 export function fillUserForm(user) {
-  editorTitle.textContent = "ユーザー編集";
+  editorTitle.textContent = "アカウント編集";
   selectedUserIdText.textContent = text(user.internal_user_id) || "IDなし";
 
   internalUserIdInput.value = text(user.internal_user_id);
@@ -229,15 +367,12 @@ export function fillUserForm(user) {
   positionInput.value = text(user.position);
   baseAreaInput.value = text(user.base_area);
   statusInput.value = text(user.status) || "active";
-  workStatusInput.value = text(user.workStatus) || "off";
-  sortOrderInput.value = text(user.sortOrder);
+  workStatusInput.value = text(user.work_status || user.workStatus) || "off";
+  sortOrderInput.value = text(user.sort_order || user.sortOrder);
   ordercasePermissionInput.value = text(user.ordercase_permission);
   memoInput.value = text(user.memo);
 
-  const modules = text(user.allowed_modules)
-    .split(",")
-    .map((item) => item.trim())
-    .filter((item) => item !== "");
+  const modules = modulesArray(user.allowed_modules);
 
   document.querySelectorAll("input[name='module']").forEach((checkbox) => {
     checkbox.checked = modules.includes(checkbox.value);
@@ -294,8 +429,14 @@ export function renderLogs(logs) {
     meta.className = "log-meta";
     meta.textContent = `${log.changed_at || "-"} / ${log.changed_by || "-"} / ${log.target_email || "-"}`;
 
+    const field = text(log.field);
+    const fieldLabel = FIELD_LABELS[field] || field || "-";
+
+    const beforeValue = displayValueByField(field, log.before_value);
+    const afterValue = displayValueByField(field, log.after_value);
+
     const body = document.createElement("div");
-    body.textContent = `${log.field || "-"}：${log.before_value || ""} → ${log.after_value || ""}`;
+    body.textContent = `${fieldLabel}：${beforeValue || ""} → ${afterValue || ""}`;
 
     const memo = document.createElement("div");
     memo.className = "log-meta";

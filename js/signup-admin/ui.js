@@ -21,6 +21,48 @@ import {
   rejectBtn
 } from "./dom.js";
 
+const ACCOUNT_TYPE_LABELS = {
+  employee: "弊社内人員",
+  member: "弊社内人員",
+  internal: "弊社内人員",
+  admin: "管理者",
+  dev: "開発管理者",
+  developer: "開発管理者",
+  partner_individual: "アライアンス個人",
+  alliance_individual: "アライアンス個人",
+  partner_company: "アライアンス法人",
+  partner_company_admin: "アライアンス法人 管理者",
+  alliance_company: "アライアンス法人",
+  alliance_company_admin: "アライアンス法人 管理者",
+  agency: "代理店"
+};
+
+const STATUS_LABELS = {
+  active: "有効",
+  inactive: "停止",
+  pending: "確認待ち",
+  pending_approval: "承認待ち"
+};
+
+const WORK_STATUS_LABELS = {
+  on: "稼働対象",
+  off: "稼働対象外",
+  active: "稼働対象",
+  inactive: "稼働対象外",
+  available: "稼働対象",
+  unavailable: "稼働対象外"
+};
+
+function normalizeKey(value) {
+  return String(value || "").trim();
+}
+
+function labelFromMap(value, map, fallback = "未設定") {
+  const key = normalizeKey(value);
+  if (!key) return fallback;
+  return map[key] || key;
+}
+
 export function setInfoBox(target, text, type = "") {
   target.textContent = text;
   target.className = "info-box";
@@ -42,19 +84,19 @@ export function renderAccountInfo(currentUser) {
 
   setInfoBox(
     employeeCodeBox,
-    currentUser.employeeCode || "社員番号を取得できませんでした",
+    currentUser.employeeCode || "アカウントコードを取得できませんでした",
     currentUser.employeeCode ? "success" : "error"
   );
 
   accountMetaArea.innerHTML = "";
 
-const roleBadge = document.createElement("span");
-roleBadge.className = "badge";
-roleBadge.textContent = "権限ロール：" + (currentUser.role || "未設定");
+  const roleBadge = document.createElement("span");
+  roleBadge.className = "badge";
+  roleBadge.textContent = "アカウント種別：" + labelFromMap(currentUser.role, ACCOUNT_TYPE_LABELS);
 
-const workStatusBadge = document.createElement("span");
-workStatusBadge.className = "badge";
-workStatusBadge.textContent = "稼働状態：" + (currentUser.workStatus || "未設定");
+  const workStatusBadge = document.createElement("span");
+  workStatusBadge.className = "badge";
+  workStatusBadge.textContent = "稼働対象状態：" + labelFromMap(currentUser.workStatus, WORK_STATUS_LABELS);
 
   accountMetaArea.appendChild(roleBadge);
   accountMetaArea.appendChild(workStatusBadge);
@@ -114,7 +156,7 @@ export function renderRequestDetail(request) {
   detailSubmittedAt.textContent = request?.submitted_at || "未選択";
   detailApplicantName.textContent = request?.applicant_name || "未選択";
   detailApplicantEmail.textContent = request?.applicant_email || "未選択";
-  detailApplicantType.textContent = request?.applicant_type || "未選択";
+  detailApplicantType.textContent = labelFromMap(request?.applicant_type, ACCOUNT_TYPE_LABELS, "未選択");
   detailCompanyName.textContent = request?.company_name || "";
   detailPhone.textContent = request?.phone || "";
   detailNote.textContent = request?.note || "";
@@ -124,16 +166,16 @@ export function applyApprovalDefaults(request) {
   const type = String(request?.applicant_type || "").trim();
   const companyName = String(request?.company_name || "").trim();
 
-  if (type === "employee") {
+  if (type === "employee" || type === "member" || type === "internal") {
     roleSelect.value = "employee";
-    organizationIdInput.value = "another";
+    organizationIdInput.value = "internal";
     allowedModulesInput.value = "pmo";
     statusSelect.value = "active";
     workStatusSelect.value = "on";
     return;
   }
 
-  if (type === "partner_individual") {
+  if (type === "partner_individual" || type === "alliance_individual") {
     roleSelect.value = "partner_individual";
     organizationIdInput.value = companyName;
     allowedModulesInput.value = "pmo";
@@ -142,7 +184,7 @@ export function applyApprovalDefaults(request) {
     return;
   }
 
-  if (type === "partner_company_admin") {
+  if (type === "partner_company_admin" || type === "alliance_company_admin") {
     roleSelect.value = "partner_company_admin";
     organizationIdInput.value = companyName;
     allowedModulesInput.value = "partner_hub";
@@ -156,6 +198,16 @@ export function applyApprovalDefaults(request) {
   allowedModulesInput.value = "";
   statusSelect.value = "active";
   workStatusSelect.value = "on";
+}
+
+export function getApprovalSummary() {
+  return [
+    `アカウント種別：${labelFromMap(roleSelect.value, ACCOUNT_TYPE_LABELS)}`,
+    `所属ID / 所属名：${organizationIdInput.value.trim() || "未入力"}`,
+    `利用可能機能：${allowedModulesInput.value.trim() || "未入力"}`,
+    `アカウント状態：${labelFromMap(statusSelect.value, STATUS_LABELS)}`,
+    `稼働対象状態：${labelFromMap(workStatusSelect.value, WORK_STATUS_LABELS)}`
+  ].join("\n");
 }
 
 export function setActionButtonsEnabled(enabled) {

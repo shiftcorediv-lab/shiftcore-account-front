@@ -11,7 +11,7 @@
     <header class="header">
       <div>
         <h1>Account Console</h1>
-        <p class="subtitle">名簿・権限管理</p>
+        <p class="subtitle">アカウント・権限管理</p>
       </div>
 
       <div class="header-actions">
@@ -29,15 +29,15 @@
     </section>
 
     <section class="operator-card" id="currentUserPermissionCard">
-  <div>
-    <div class="label">現在ログイン中ユーザーの権限</div>
-    <div id="currentUserPermissionText" class="operator-text">確認中...</div>
-  </div>
-</section>
+      <div>
+        <div class="label">現在ログイン中アカウントの権限</div>
+        <div id="currentUserPermissionText" class="operator-text">確認中...</div>
+      </div>
+    </section>
 
     <section class="toolbar">
-      <input id="searchInput" type="search" placeholder="氏名 / 表示名 / メール / 社員番号 / 所属 / 部署 / 役職 / エリア / 権限で検索">
-      <button id="newUserBtn" class="primary-button">ユーザー追加</button>
+      <input id="searchInput" type="search" placeholder="氏名 / 表示名 / メール / アカウントコード / 所属 / 部署 / 役職 / エリア / 権限で検索">
+      <button id="newUserBtn" class="primary-button">アカウント追加</button>
       <button id="reloadBtn" class="secondary-button">再読み込み</button>
     </section>
 
@@ -51,16 +51,16 @@
         <div id="totalCountText" class="summary-value">0</div>
       </div>
       <div class="summary-card">
-        <div class="summary-label">ステータス</div>
+        <div class="summary-label">アカウント状態</div>
         <div id="statusSummaryText" class="summary-value">-</div>
       </div>
     </section>
 
     <main class="content-grid">
       <section class="panel user-panel">
-       <div class="panel-header">
-  <h2>ユーザー名簿</h2>
-</div>
+        <div class="panel-header">
+          <h2>アカウント一覧</h2>
+        </div>
 
         <div class="table-wrap">
           <table>
@@ -68,8 +68,9 @@
               <tr>
                 <th>氏名</th>
                 <th>表示名</th>
-                <th>社員番号</th>
+                <th>アカウントコード</th>
                 <th>メール</th>
+                <th>アカウント種別</th>
                 <th>部署</th>
                 <th>役職</th>
                 <th>担当エリア</th>
@@ -85,7 +86,7 @@
 
       <aside class="panel editor-panel">
         <div class="panel-header">
-          <h2 id="editorTitle">ユーザー編集</h2>
+          <h2 id="editorTitle">アカウント編集</h2>
           <span id="selectedUserIdText" class="hint">未選択</span>
         </div>
 
@@ -93,7 +94,7 @@
           <input type="hidden" id="internalUserIdInput">
 
           <label>
-            氏名
+            氏名 / 登録名
             <input id="nameInput" type="text" autocomplete="off">
           </label>
 
@@ -103,8 +104,8 @@
           </label>
 
           <label>
-            社員番号
-            <input id="employeeCodeInput" type="text" autocomplete="off">
+            アカウントコード
+            <input id="employeeCodeInput" type="text" autocomplete="off" placeholder="既存保存項目：employee_code">
           </label>
 
           <label>
@@ -118,17 +119,20 @@
           </label>
 
           <label>
-            ロール
+            アカウント種別
             <select id="roleInput">
-              <option value="member">member</option>
-              <option value="admin">admin</option>
-              <option value="dev">dev</option>
+              <option value="member">弊社内人員</option>
+              <option value="admin">管理者</option>
+              <option value="dev">開発管理者</option>
+              <option value="partner_individual">アライアンス個人</option>
+              <option value="partner_company_admin">アライアンス法人 管理者</option>
+              <option value="agency">代理店</option>
             </select>
           </label>
 
           <label>
-            所属ID
-            <input id="organizationInput" type="text" autocomplete="off">
+            所属ID / 所属名
+            <input id="organizationInput" type="text" autocomplete="off" placeholder="例：internal / ORG-001 / 所属名">
           </label>
 
           <label>
@@ -147,18 +151,18 @@
           </label>
 
           <label>
-            ステータス
+            アカウント状態
             <select id="statusInput">
-              <option value="active">active</option>
-              <option value="inactive">inactive</option>
+              <option value="active">有効</option>
+              <option value="inactive">停止</option>
             </select>
           </label>
 
           <label>
-            稼働状態
+            稼働対象状態
             <select id="workStatusInput">
-              <option value="off">off</option>
-              <option value="on">on</option>
+              <option value="off">稼働対象外</option>
+              <option value="on">稼働対象</option>
             </select>
           </label>
 
@@ -169,29 +173,35 @@
 
           <fieldset>
             <legend>利用可能機能</legend>
+
             <label class="check-row">
               <input type="checkbox" name="module" value="account">
-              account
+              アカウント基盤
             </label>
+
             <label class="check-row">
               <input type="checkbox" name="module" value="account_console">
-              account_console
+              Account Console
             </label>
+
             <label class="check-row">
               <input type="checkbox" name="module" value="pmo">
-              pmo
+              希望休 / 稼働不可日申請
             </label>
+
             <label class="check-row">
               <input type="checkbox" name="module" value="ordercase">
-              ordercase
+              OrderCase
             </label>
+
             <label class="check-row">
               <input type="checkbox" name="module" value="manual">
-              manual
+              取扱説明書
             </label>
+
             <label class="check-row">
               <input type="checkbox" name="module" value="shift">
-              shift
+              ShiftBuilder
             </label>
           </fieldset>
 
@@ -199,10 +209,10 @@
             OrderCase権限
             <select id="ordercasePermissionInput">
               <option value="">なし</option>
-              <option value="all">all</option>
-              <option value="edit">edit</option>
-              <option value="view">view</option>
-              <option value="view_without_amount">view_without_amount</option>
+              <option value="all">全操作可能</option>
+              <option value="edit">登録・編集可能</option>
+              <option value="view">閲覧のみ 金額表示あり</option>
+              <option value="view_without_amount">閲覧のみ 金額非表示</option>
             </select>
           </label>
 
@@ -212,8 +222,8 @@
           </label>
 
           <div class="readonly-box">
-            <div><strong>auth_provider：</strong><span id="authProviderText">-</span></div>
-            <div><strong>auth_uid：</strong><span id="authUidText">-</span></div>
+            <div><strong>認証プロバイダ：</strong><span id="authProviderText">-</span></div>
+            <div><strong>認証UID：</strong><span id="authUidText">-</span></div>
             <div><strong>作成：</strong><span id="createdAtText">-</span></div>
             <div><strong>更新：</strong><span id="updatedAtText">-</span></div>
             <div><strong>更新者：</strong><span id="updatedByText">-</span></div>

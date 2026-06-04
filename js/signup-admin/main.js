@@ -16,6 +16,7 @@ import {
   renderRequestDetail,
   applyApprovalDefaults,
   setActionButtonsEnabled,
+  getApprovalSummary,
   showMessage
 } from "./ui.js";
 import { canUseSignupAdmin, goToAccountPortal } from "./navigation.js";
@@ -73,6 +74,15 @@ approveBtn.addEventListener("click", async () => {
 
   if (!roleSelect.value || !organizationIdInput.value.trim() || !allowedModulesInput.value.trim() || !statusSelect.value || !workStatusSelect.value) {
     showMessage("承認に必要な項目を入力してください", "error");
+    return;
+  }
+
+  const confirmed = window.confirm(
+    "この内容で承認します。よろしいですか？\n\n" + getApprovalSummary()
+  );
+
+  if (!confirmed) {
+    showMessage("承認をキャンセルしました");
     return;
   }
 

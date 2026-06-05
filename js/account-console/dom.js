@@ -31,6 +31,7 @@ export const personTypeInput = document.getElementById("personTypeInput");
 export const contractTypeInput = document.getElementById("contractTypeInput");
 export const engagementStatusInput = document.getElementById("engagementStatusInput");
 export const organizationInput = document.getElementById("organizationInput");
+export const organizationHelpText = document.getElementById("organizationHelpText");
 export const departmentInput = document.getElementById("departmentInput");
 export const positionInput = document.getElementById("positionInput");
 export const baseAreaInput = document.getElementById("baseAreaInput");

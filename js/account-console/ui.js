@@ -134,6 +134,51 @@ const FIELD_LABELS = {
 // ===== 表示ラベル定義ここまで =====
 
 
+// ===== ローディング表示ここから =====
+function ensureLoadingOverlay() {
+  let overlay = document.getElementById("accountConsoleLoadingOverlay");
+
+  if (overlay) {
+    return overlay;
+  }
+
+  overlay = document.createElement("div");
+  overlay.id = "accountConsoleLoadingOverlay";
+  overlay.className = "loading-overlay";
+  overlay.innerHTML = `
+    <div class="loading-card">
+      <div class="loading-spinner"></div>
+      <div id="accountConsoleLoadingText" class="loading-text">読み込み中...</div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
+export function showLoading(message = "読み込み中...") {
+  const overlay = ensureLoadingOverlay();
+  const textElement = document.getElementById("accountConsoleLoadingText");
+
+  if (textElement) {
+    textElement.textContent = message;
+  }
+
+  overlay.classList.add("show");
+}
+
+export function hideLoading() {
+  const overlay = document.getElementById("accountConsoleLoadingOverlay");
+
+  if (!overlay) {
+    return;
+  }
+
+  overlay.classList.remove("show");
+}
+// ===== ローディング表示ここまで =====
+
+
 // ===== 状態表示ここから =====
 export function setStatus(message) {
   statusBox.textContent = message;
@@ -198,10 +243,6 @@ function modulesArray(value) {
     .split(",")
     .map((item) => item.trim())
     .filter((item) => item !== "");
-}
-
-function modulesText(value) {
-  return modulesArray(value).join(", ");
 }
 
 function modulesTextForDisplay(value) {
@@ -279,6 +320,34 @@ function makeTd(value) {
   return td;
 }
 // ===== テキスト整形ここまで =====
+
+
+// ===== 保存確認メッセージここから =====
+export function buildSaveConfirmMessage(user, isUpdate) {
+  const actionLabel = isUpdate ? "更新" : "新規作成";
+
+  return [
+    `この内容でアカウントを${actionLabel}します。よろしいですか？`,
+    "",
+    `氏名 / 登録名：${text(user.name) || "未入力"}`,
+    `表示名：${text(user.display_name) || "-"}`,
+    `アカウントコード：${text(user.employee_code) || "-"}`,
+    `メール：${text(user.email) || "未入力"}`,
+    `電話番号：${text(user.phone) || "-"}`,
+    `アカウント種別：${labelFromMap(user.role, ROLE_LABELS, "-")}`,
+    `人員種別：${labelFromMap(user.person_type, PERSON_TYPE_LABELS, "-")}`,
+    `契約区分：${labelFromMap(user.contract_type, CONTRACT_TYPE_LABELS, "-")}`,
+    `稼働対象状態：${labelFromMap(user.engagement_status, ENGAGEMENT_STATUS_LABELS, "-")}`,
+    `所属ID / 所属名：${text(user.organization_id) || "-"}`,
+    `担当エリア：${text(user.base_area) || "-"}`,
+    `アカウント状態：${labelFromMap(user.status, STATUS_LABELS, "-")}`,
+    `利用可能機能：${modulesTextForDisplay(user.allowed_modules) || "-"}`,
+    `OrderCase権限：${labelFromMap(user.ordercase_permission, ORDERCASE_PERMISSION_LABELS, "なし")}`,
+    "",
+    "問題なければOKを押してください。"
+  ].join("\n");
+}
+// ===== 保存確認メッセージここまで =====
 
 
 // ===== ユーザー絞り込みここから =====

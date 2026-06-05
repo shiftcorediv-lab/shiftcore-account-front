@@ -2,6 +2,11 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -10,6 +15,7 @@ body {
 }
 
 .page {
+  width: 100%;
   max-width: 1240px;
   margin: 0 auto;
   padding: 24px;
@@ -153,12 +159,14 @@ button:disabled {
 
 .content-grid {
   display: grid;
+  min-width: 0;
   grid-template-columns: minmax(0, 1.4fr) 420px;
   gap: 14px;
   align-items: start;
 }
 
 .panel {
+  min-width: 0;
   padding: 16px;
 }
 
@@ -170,8 +178,15 @@ button:disabled {
   margin-bottom: 12px;
 }
 
+.user-panel {
+  min-width: 0;
+}
+
 .table-wrap {
-  overflow: auto;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
   max-height: 620px;
   border: 1px solid #eee;
   border-radius: 12px;
@@ -180,7 +195,7 @@ button:disabled {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1120px;
+  min-width: 1460px;
   table-layout: auto;
 }
 
@@ -213,7 +228,7 @@ td:nth-child(4) {
   text-overflow: ellipsis;
 }
 
-td:nth-child(10) {
+td:nth-child(13) {
   max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -363,6 +378,6 @@ legend {
   }
 
   table {
-    min-width: 1120px;
+    min-width: 1460px;
   }
 }

@@ -7,6 +7,13 @@
   <link rel="stylesheet" href="./css/account-console.css">
 </head>
 <body>
+  <div id="accountConsoleLoadingOverlay" class="loading-overlay show">
+    <div class="loading-card">
+      <div class="loading-spinner"></div>
+      <div id="accountConsoleLoadingText" class="loading-text">初期化中...</div>
+    </div>
+  </div>
+
   <div class="page">
     <header class="header">
       <div>
@@ -124,24 +131,22 @@
           <label>
             アカウント種別
             <select id="roleInput">
-              <option value="member">弊社内人員</option>
+              <option value="member">一般アカウント</option>
               <option value="admin">管理者</option>
-              <option value="dev">開発管理者</option>
-              <option value="partner_individual">アライアンス個人</option>
-              <option value="partner_company_admin">アライアンス法人 管理者</option>
-              <option value="agency">代理店</option>
             </select>
           </label>
+          <div class="field-help">システム上の管理・権限区分です。開発管理者は通常編集画面では選択できません。</div>
 
           <label>
             人員種別
             <select id="personTypeInput">
               <option value="internal">弊社内人員</option>
               <option value="alliance_individual">アライアンス個人</option>
-              <option value="alliance_company_member">アライアンス法人所属メンバー</option>
-              <option value="agency">代理店</option>
+              <option value="alliance_company_member">アライアンス法人所属人員</option>
+              <option value="agency">代理店担当者</option>
             </select>
           </label>
+          <div class="field-help">実際の所属・立場です。ShiftBuilderや実績管理での扱いに使います。</div>
 
           <label>
             契約区分
@@ -152,6 +157,7 @@
               <option value="outsourced">業務委託</option>
             </select>
           </label>
+          <div class="field-help">主に弊社内人員向けの契約区分です。有給管理などに使います。</div>
 
           <label>
             稼働対象状態
@@ -163,8 +169,9 @@
 
           <label>
             所属ID / 所属名
-            <input id="organizationInput" type="text" autocomplete="off" placeholder="例：internal / ORG-001 / 所属名">
+            <input id="organizationInput" type="text" autocomplete="off" placeholder="例：internal / 株式会社〇〇 / ORG-001">
           </label>
+          <div id="organizationHelpText" class="field-help"></div>
 
           <label>
             部署

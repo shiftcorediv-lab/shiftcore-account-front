@@ -176,6 +176,25 @@ export function hideLoading() {
 
   overlay.classList.remove("show");
 }
+
+export function setLogsLoading(isLoading, message = "変更履歴を取得中...") {
+  if (!logsList) {
+    return;
+  }
+
+  if (isLoading) {
+    logsList.classList.add("logs-loading");
+    logsList.innerHTML = `
+      <div class="logs-loading-box">
+        <div class="logs-spinner"></div>
+        <div>${message}</div>
+      </div>
+    `;
+    return;
+  }
+
+  logsList.classList.remove("logs-loading");
+}
 // ===== ローディング表示ここまで =====
 
 
@@ -323,29 +342,80 @@ function makeTd(value) {
 
 
 // ===== 保存確認メッセージここから =====
-export function buildSaveConfirmMessage(user, isUpdate) {
+function getDisplayValue(field, value) {
+  return displayValueByField(field, value) || "-";
+}
+
+function normalizeForCompare(value) {
+  return text(value);
+}
+
+export function buildSaveConfirmMessage(beforeUser, afterUser) {
+  const isUpdate = Boolean(afterUser.internal_user_id);
   const actionLabel = isUpdate ? "更新" : "新規作成";
 
-  return [
-    `この内容でアカウントを${actionLabel}します。よろしいですか？`,
+  const fields = [
+    ["name", "氏名 / 登録名"],
+    ["display_name", "表示名"],
+    ["employee_code", "アカウントコード"],
+    ["email", "メール"],
+    ["phone", "電話番号"],
+    ["role", "アカウント種別"],
+    ["person_type", "人員種別"],
+    ["contract_type", "契約区分"],
+    ["engagement_status", "稼働対象状態"],
+    ["organization_id", "所属ID / 所属名"],
+    ["department", "部署"],
+    ["position", "役職"],
+    ["base_area", "担当エリア"],
+    ["status", "アカウント状態"],
+    ["allowed_modules", "利用可能機能"],
+    ["ordercase_permission", "OrderCase権限"],
+    ["memo", "メモ"]
+  ];
+
+  const lines = [
+    `この内容でアカウントを${actionLabel}します。`,
     "",
-    `氏名 / 登録名：${text(user.name) || "未入力"}`,
-    `表示名：${text(user.display_name) || "-"}`,
-    `アカウントコード：${text(user.employee_code) || "-"}`,
-    `メール：${text(user.email) || "未入力"}`,
-    `電話番号：${text(user.phone) || "-"}`,
-    `アカウント種別：${labelFromMap(user.role, ROLE_LABELS, "-")}`,
-    `人員種別：${labelFromMap(user.person_type, PERSON_TYPE_LABELS, "-")}`,
-    `契約区分：${labelFromMap(user.contract_type, CONTRACT_TYPE_LABELS, "-")}`,
-    `稼働対象状態：${labelFromMap(user.engagement_status, ENGAGEMENT_STATUS_LABELS, "-")}`,
-    `所属ID / 所属名：${text(user.organization_id) || "-"}`,
-    `担当エリア：${text(user.base_area) || "-"}`,
-    `アカウント状態：${labelFromMap(user.status, STATUS_LABELS, "-")}`,
-    `利用可能機能：${modulesTextForDisplay(user.allowed_modules) || "-"}`,
-    `OrderCase権限：${labelFromMap(user.ordercase_permission, ORDERCASE_PERMISSION_LABELS, "なし")}`,
-    "",
-    "問題なければOKを押してください。"
-  ].join("\n");
+    "変更内容："
+  ];
+
+  if (!beforeUser) {
+    fields.forEach(([field, label]) => {
+      const afterValue = getDisplayValue(field, afterUser[field]);
+      lines.push(`・${label}：${afterValue}`);
+    });
+
+    lines.push("");
+    lines.push("問題なければOKを押してください。");
+    return lines.join("\n");
+  }
+
+  const changedLines = [];
+
+  fields.forEach(([field, label]) => {
+    const beforeRaw = beforeUser[field];
+    const afterRaw = afterUser[field];
+
+    if (normalizeForCompare(beforeRaw) === normalizeForCompare(afterRaw)) {
+      return;
+    }
+
+    changedLines.push(
+      `・${label}：${getDisplayValue(field, beforeRaw)} → ${getDisplayValue(field, afterRaw)}`
+    );
+  });
+
+  if (changedLines.length === 0) {
+    lines.push("・変更された項目はありません。");
+  } else {
+    lines.push(...changedLines);
+  }
+
+  lines.push("");
+  lines.push("問題なければOKを押してください。");
+
+  return lines.join("\n");
 }
 // ===== 保存確認メッセージここまで =====
 
@@ -561,6 +631,7 @@ export function collectUserForm() {
 
 // ===== 変更履歴描画ここから =====
 export function renderLogs(logs) {
+  logsList.classList.remove("logs-loading");
   logsList.innerHTML = "";
 
   if (!logs.length) {

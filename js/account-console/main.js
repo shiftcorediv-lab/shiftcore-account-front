@@ -29,7 +29,10 @@ import {
   clearUserForm,
   fillUserForm,
   collectUserForm,
-  renderLogs
+  renderLogs,
+  buildSaveConfirmMessage,
+  showLoading,
+  hideLoading
 } from "./ui.js";
 
 // ===== 状態ここから =====
@@ -41,19 +44,32 @@ let currentUser = null;
 // ===== 状態ここまで =====
 
 
+// ===== 操作ボタン制御ここから =====
+function setActionButtonsDisabled(disabled) {
+  saveUserBtn.disabled = disabled;
+  reloadBtn.disabled = disabled;
+  newUserBtn.disabled = disabled;
+  loadLogsBtn.disabled = disabled;
+}
+// ===== 操作ボタン制御ここまで =====
+
+
 // ===== 初期化ここから =====
 async function init() {
   try {
+    showLoading("ログイン状態を確認中...");
     setStatus("ログイン状態を確認中...");
 
     session = await requireAccountConsoleSession();
 
     if (!session) {
+      hideLoading();
       return;
     }
 
     idToken = session.idToken;
 
+    showLoading("Account Console権限を確認中...");
     setStatus("Account Console権限を確認中...");
 
     const currentResult = await getCurrentAccountConsoleUser(idToken);
@@ -61,6 +77,7 @@ async function init() {
     if (!currentResult.ok) {
       setPermissionError(currentResult.message || "Account Consoleの利用権限がありません");
       setStatus(JSON.stringify(currentResult, null, 2));
+      hideLoading();
       return;
     }
 
@@ -68,8 +85,8 @@ async function init() {
     setOperator(currentResult.user);
     renderCurrentUserPermission(currentResult.user);
 
-    await loadUsers();
-    await loadLogs();
+    await loadUsers("ユーザー名簿を取得中...");
+    await loadLogs("変更履歴を取得中...");
 
     clearUserForm();
     setStatus("Account Consoleを読み込みました");
@@ -77,14 +94,17 @@ async function init() {
   } catch (error) {
     setPermissionError(error.message);
     setStatus("初期化エラー\n\n" + error.message);
+  } finally {
+    hideLoading();
   }
 }
 // ===== 初期化ここまで =====
 
 
 // ===== ユーザー一覧読み込みここから =====
-async function loadUsers() {
-  setStatus("ユーザー名簿を取得中...");
+async function loadUsers(loadingMessage = "ユーザー名簿を取得中...") {
+  showLoading(loadingMessage);
+  setStatus(loadingMessage);
 
   const result = await listAccountUsers(idToken);
 
@@ -106,7 +126,14 @@ function renderCurrentUsers() {
     selectedUser = user;
     fillUserForm(user);
     renderCurrentUsers();
-    loadLogsForSelectedUser();
+
+    loadLogsForSelectedUser("選択中アカウントの変更履歴を取得中...")
+      .catch((error) => {
+        setStatus("履歴取得エラー\n\n" + error.message);
+      })
+      .finally(() => {
+        hideLoading();
+      });
   });
 
   renderSummary(filtered, allUsers);
@@ -119,9 +146,6 @@ async function saveUser(event) {
   event.preventDefault();
 
   try {
-    saveUserBtn.disabled = true;
-    setStatus("保存中...");
-
     const user = collectUserForm();
 
     if (!user.name) {
@@ -131,6 +155,18 @@ async function saveUser(event) {
     if (!user.email) {
       throw new Error("メールを入力してください");
     }
+
+    const confirmMessage = buildSaveConfirmMessage(user, Boolean(user.internal_user_id));
+    const confirmed = window.confirm(confirmMessage);
+
+    if (!confirmed) {
+      setStatus("保存をキャンセルしました");
+      return;
+    }
+
+    setActionButtonsDisabled(true);
+    showLoading("保存中...");
+    setStatus("保存中...");
 
     let result;
 
@@ -146,8 +182,8 @@ async function saveUser(event) {
 
     selectedUser = result.user || null;
 
-    await loadUsers();
-    await loadLogsForSelectedUser();
+    await loadUsers("保存後のアカウント一覧を再取得中...");
+    await loadLogsForSelectedUser("保存後の変更履歴を取得中...");
 
     if (selectedUser) {
       fillUserForm(selectedUser);
@@ -158,14 +194,17 @@ async function saveUser(event) {
   } catch (error) {
     setStatus("保存エラー\n\n" + error.message);
   } finally {
-    saveUserBtn.disabled = false;
+    setActionButtonsDisabled(false);
+    hideLoading();
   }
 }
 // ===== 保存ここまで =====
 
 
 // ===== 履歴ここから =====
-async function loadLogs() {
+async function loadLogs(loadingMessage = "変更履歴を取得中...") {
+  showLoading(loadingMessage);
+
   const result = await getAccountLogs(idToken, "");
 
   if (!result.ok) {
@@ -175,9 +214,11 @@ async function loadLogs() {
   renderLogs(Array.isArray(result.logs) ? result.logs : []);
 }
 
-async function loadLogsForSelectedUser() {
+async function loadLogsForSelectedUser(loadingMessage = "変更履歴を取得中...") {
+  showLoading(loadingMessage);
+
   if (!selectedUser || !selectedUser.internal_user_id) {
-    await loadLogs();
+    await loadLogs(loadingMessage);
     return;
   }
 
@@ -213,10 +254,15 @@ signupAdminBtn.addEventListener("click", () => {
 
 reloadBtn.addEventListener("click", async () => {
   try {
-    await loadUsers();
-    await loadLogsForSelectedUser();
+    setActionButtonsDisabled(true);
+    await loadUsers("再読み込み中...");
+    await loadLogsForSelectedUser("変更履歴を再取得中...");
+    setStatus("再読み込みしました");
   } catch (error) {
     setStatus("再読み込みエラー\n\n" + error.message);
+  } finally {
+    setActionButtonsDisabled(false);
+    hideLoading();
   }
 });
 
@@ -224,13 +270,21 @@ newUserBtn.addEventListener("click", () => {
   selectedUser = null;
   clearUserForm();
   renderCurrentUsers();
-  loadLogs();
+
+  loadLogs("変更履歴を取得中...")
+    .catch((error) => {
+      setStatus("履歴取得エラー\n\n" + error.message);
+    })
+    .finally(() => {
+      hideLoading();
+    });
 });
 
 clearFormBtn.addEventListener("click", () => {
   selectedUser = null;
   clearUserForm();
   renderCurrentUsers();
+  setStatus("新規入力に戻しました");
 });
 
 searchInput.addEventListener("input", () => {
@@ -241,10 +295,14 @@ userForm.addEventListener("submit", saveUser);
 
 loadLogsBtn.addEventListener("click", async () => {
   try {
-    await loadLogsForSelectedUser();
+    setActionButtonsDisabled(true);
+    await loadLogsForSelectedUser("変更履歴を更新中...");
     setStatus("変更履歴を更新しました");
   } catch (error) {
     setStatus("履歴取得エラー\n\n" + error.message);
+  } finally {
+    setActionButtonsDisabled(false);
+    hideLoading();
   }
 });
 // ===== イベントここまで =====

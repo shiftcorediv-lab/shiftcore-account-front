@@ -19,6 +19,7 @@ import {
   contractTypeInput,
   engagementStatusInput,
   organizationInput,
+  organizationHelpText,
   departmentInput,
   positionInput,
   baseAreaInput,
@@ -38,19 +39,19 @@ import {
 
 // ===== 表示ラベル定義ここから =====
 const ROLE_LABELS = {
-  member: "弊社内人員",
-  employee: "弊社内人員",
-  internal: "弊社内人員",
+  member: "一般アカウント",
+  employee: "一般アカウント",
+  internal: "一般アカウント",
   admin: "管理者",
   dev: "開発管理者",
   developer: "開発管理者",
-  partner_individual: "アライアンス個人",
-  alliance_individual: "アライアンス個人",
-  partner_company: "アライアンス法人",
-  partner_company_admin: "アライアンス法人 管理者",
-  alliance_company: "アライアンス法人",
-  alliance_company_admin: "アライアンス法人 管理者",
-  agency: "代理店"
+  partner_individual: "一般アカウント",
+  alliance_individual: "一般アカウント",
+  partner_company: "一般アカウント",
+  partner_company_admin: "管理者",
+  alliance_company: "一般アカウント",
+  alliance_company_admin: "管理者",
+  agency: "一般アカウント"
 };
 
 const STATUS_LABELS = {
@@ -72,8 +73,8 @@ const WORK_STATUS_LABELS = {
 const PERSON_TYPE_LABELS = {
   internal: "弊社内人員",
   alliance_individual: "アライアンス個人",
-  alliance_company_member: "アライアンス法人所属メンバー",
-  agency: "代理店"
+  alliance_company_member: "アライアンス法人所属人員",
+  agency: "代理店担当者"
 };
 
 const CONTRACT_TYPE_LABELS = {
@@ -288,6 +289,39 @@ function convertEngagementStatusToWorkStatus(value) {
   }
 
   return "off";
+}
+
+function normalizeOrganizationByPersonType(personType, organizationId) {
+  if (text(personType) === "internal") {
+    return "internal";
+  }
+
+  return text(organizationId);
+}
+
+export function updateOrganizationHelpState() {
+  const personType = text(personTypeInput.value);
+
+  const helpMap = {
+    internal: "弊社内人員は internal 固定です。変更できません。",
+    alliance_individual: "アライアンス個人は、必要に応じて本人識別用の所属名や管理用IDを入力します。",
+    alliance_company_member: "所属するアライアンス法人名、または法人管理IDを入力します。例：株式会社〇〇 / ORG-001",
+    agency: "所属する代理店名、または代理店IDを入力します。例：〇〇代理店 / AG-001"
+  };
+
+  if (organizationHelpText) {
+    organizationHelpText.textContent = helpMap[personType] || "所属IDまたは所属名を入力します。";
+  }
+
+  if (personType === "internal") {
+    organizationInput.value = "internal";
+    organizationInput.disabled = true;
+    organizationInput.classList.add("locked-input");
+    return;
+  }
+
+  organizationInput.disabled = false;
+  organizationInput.classList.remove("locked-input");
 }
 
 function displayValueByField(field, value) {
@@ -543,7 +577,8 @@ export function clearUserForm() {
   personTypeInput.value = "internal";
   contractTypeInput.value = "none";
   engagementStatusInput.value = "inactive";
-  organizationInput.value = "";
+  organizationInput.value = "internal";
+updateOrganizationHelpState();
   departmentInput.value = "";
   positionInput.value = "";
   baseAreaInput.value = "";
@@ -578,6 +613,7 @@ export function fillUserForm(user) {
   contractTypeInput.value = text(user.contract_type) || "none";
   engagementStatusInput.value = text(user.engagement_status) || convertWorkStatusToEngagementStatus(user.work_status || user.workStatus);
   organizationInput.value = text(user.organization_id);
+  updateOrganizationHelpState();
   departmentInput.value = text(user.department);
   positionInput.value = text(user.position);
   baseAreaInput.value = text(user.base_area);
@@ -603,6 +639,12 @@ export function collectUserForm() {
   const modules = Array.from(document.querySelectorAll("input[name='module']:checked"))
     .map((checkbox) => checkbox.value);
 
+const selectedPersonType = text(personTypeInput.value);
+const normalizedOrganizationId = normalizeOrganizationByPersonType(
+  selectedPersonType,
+  organizationInput.value
+);
+  
   return {
     internal_user_id: text(internalUserIdInput.value),
     name: text(nameInput.value),
@@ -611,11 +653,11 @@ export function collectUserForm() {
     email: text(emailInput.value),
     phone: text(phoneInput.value),
     role: text(roleInput.value),
-    person_type: text(personTypeInput.value),
+    person_type: selectedPersonType,
     contract_type: text(contractTypeInput.value),
     engagement_status: text(engagementStatusInput.value),
     workStatus: convertEngagementStatusToWorkStatus(engagementStatusInput.value),
-    organization_id: text(organizationInput.value),
+    organization_id: normalizedOrganizationId,
     department: text(departmentInput.value),
     position: text(positionInput.value),
     base_area: text(baseAreaInput.value),
@@ -668,3 +710,10 @@ export function renderLogs(logs) {
   });
 }
 // ===== 変更履歴描画ここまで =====
+
+// ===== 人員種別変更イベント設定ここから =====
+if (personTypeInput) {
+  personTypeInput.addEventListener("change", updateOrganizationHelpState);
+  updateOrganizationHelpState();
+}
+// ===== 人員種別変更イベント設定ここまで =====

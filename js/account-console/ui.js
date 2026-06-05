@@ -15,12 +15,14 @@ import {
   emailInput,
   phoneInput,
   roleInput,
+  personTypeInput,
+  contractTypeInput,
+  engagementStatusInput,
   organizationInput,
   departmentInput,
   positionInput,
   baseAreaInput,
   statusInput,
-  workStatusInput,
   sortOrderInput,
   ordercasePermissionInput,
   memoInput,
@@ -67,6 +69,25 @@ const WORK_STATUS_LABELS = {
   unavailable: "稼働対象外"
 };
 
+const PERSON_TYPE_LABELS = {
+  internal: "弊社内人員",
+  alliance_individual: "アライアンス個人",
+  alliance_company_member: "アライアンス法人所属メンバー",
+  agency: "代理店"
+};
+
+const CONTRACT_TYPE_LABELS = {
+  regular_employee: "正社員",
+  contract_employee: "契約社員",
+  outsourced: "業務委託",
+  none: "対象外 / 未設定"
+};
+
+const ENGAGEMENT_STATUS_LABELS = {
+  active: "稼働対象",
+  inactive: "稼働対象外"
+};
+
 const MODULE_LABELS = {
   account: "アカウント基盤",
   account_console: "Account Console",
@@ -92,6 +113,9 @@ const FIELD_LABELS = {
   email: "メール",
   phone: "電話番号",
   role: "アカウント種別",
+  person_type: "人員種別",
+  contract_type: "契約区分",
+  engagement_status: "稼働対象状態",
   organization_id: "所属ID / 所属名",
   department: "部署",
   position: "役職",
@@ -139,11 +163,17 @@ export function renderCurrentUserPermission(user) {
   const modules = modulesTextForDisplay(user.allowed_modules);
   const ordercasePermission = labelFromMap(user.ordercase_permission, ORDERCASE_PERMISSION_LABELS, "なし");
   const role = labelFromMap(user.role, ROLE_LABELS, "-");
+  const personType = labelFromMap(user.person_type || user.personType, PERSON_TYPE_LABELS, "-");
+  const contractType = labelFromMap(user.contract_type || user.contractType, CONTRACT_TYPE_LABELS, "-");
   const status = labelFromMap(user.status, STATUS_LABELS, "-");
-  const workStatus = labelFromMap(user.work_status || user.workStatus, WORK_STATUS_LABELS, "-");
+  const engagementStatus = labelFromMap(
+    user.engagement_status || user.engagementStatus || convertWorkStatusToEngagementStatus(user.work_status || user.workStatus),
+    ENGAGEMENT_STATUS_LABELS,
+    "-"
+  );
 
   currentUserPermissionText.textContent =
-    `アカウント種別：${role} / アカウント状態：${status} / 稼働対象状態：${workStatus} / 利用可能機能：${modules || "-"} / OrderCase：${ordercasePermission}`;
+    `アカウント種別：${role} / 人員種別：${personType} / 契約区分：${contractType} / アカウント状態：${status} / 稼働対象状態：${engagementStatus} / 利用可能機能：${modules || "-"} / OrderCase：${ordercasePermission}`;
 }
 // ===== 状態表示ここまで =====
 
@@ -180,6 +210,26 @@ function modulesTextForDisplay(value) {
     .join(", ");
 }
 
+function convertWorkStatusToEngagementStatus(value) {
+  const key = text(value).toLowerCase();
+
+  if (key === "on" || key === "active" || key === "available") {
+    return "active";
+  }
+
+  return "inactive";
+}
+
+function convertEngagementStatusToWorkStatus(value) {
+  const key = text(value).toLowerCase();
+
+  if (key === "active") {
+    return "on";
+  }
+
+  return "off";
+}
+
 function displayValueByField(field, value) {
   const key = text(field);
   const raw = text(value);
@@ -194,6 +244,18 @@ function displayValueByField(field, value) {
 
   if (key === "status") {
     return labelFromMap(raw, STATUS_LABELS, raw);
+  }
+
+  if (key === "person_type") {
+    return labelFromMap(raw, PERSON_TYPE_LABELS, raw);
+  }
+
+  if (key === "contract_type") {
+    return labelFromMap(raw, CONTRACT_TYPE_LABELS, raw);
+  }
+
+  if (key === "engagement_status") {
+    return labelFromMap(raw, ENGAGEMENT_STATUS_LABELS, raw);
   }
 
   if (key === "work_status" || key === "workStatus") {
@@ -236,6 +298,12 @@ export function filterUsers(users, keyword) {
       user.phone,
       user.role,
       labelFromMap(user.role, ROLE_LABELS, ""),
+      user.person_type,
+      labelFromMap(user.person_type, PERSON_TYPE_LABELS, ""),
+      user.contract_type,
+      labelFromMap(user.contract_type, CONTRACT_TYPE_LABELS, ""),
+      user.engagement_status,
+      labelFromMap(user.engagement_status, ENGAGEMENT_STATUS_LABELS, ""),
       user.organization_id,
       user.department,
       user.position,
@@ -265,7 +333,7 @@ export function renderUsers(users, selectedUserId, onSelectUser) {
   if (!users.length) {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
-    td.colSpan = 11;
+    td.colSpan = 14;
     td.textContent = "表示できるアカウントがありません";
     tr.appendChild(td);
     userTableBody.appendChild(tr);
@@ -284,6 +352,9 @@ export function renderUsers(users, selectedUserId, onSelectUser) {
     tr.appendChild(makeTd(user.employee_code));
     tr.appendChild(makeTd(user.email));
     tr.appendChild(makeTd(labelFromMap(user.role, ROLE_LABELS, "-")));
+    tr.appendChild(makeTd(labelFromMap(user.person_type, PERSON_TYPE_LABELS, "-")));
+    tr.appendChild(makeTd(labelFromMap(user.contract_type, CONTRACT_TYPE_LABELS, "-")));
+    tr.appendChild(makeTd(labelFromMap(user.engagement_status, ENGAGEMENT_STATUS_LABELS, "-")));
     tr.appendChild(makeTd(user.department));
     tr.appendChild(makeTd(user.position));
     tr.appendChild(makeTd(user.base_area));
@@ -330,12 +401,14 @@ export function clearUserForm() {
   emailInput.value = "";
   phoneInput.value = "";
   roleInput.value = "member";
+  personTypeInput.value = "internal";
+  contractTypeInput.value = "none";
+  engagementStatusInput.value = "inactive";
   organizationInput.value = "";
   departmentInput.value = "";
   positionInput.value = "";
   baseAreaInput.value = "";
   statusInput.value = "active";
-  workStatusInput.value = "off";
   sortOrderInput.value = "";
   ordercasePermissionInput.value = "";
   memoInput.value = "";
@@ -362,12 +435,14 @@ export function fillUserForm(user) {
   emailInput.value = text(user.email);
   phoneInput.value = text(user.phone);
   roleInput.value = text(user.role) || "member";
+  personTypeInput.value = text(user.person_type) || "internal";
+  contractTypeInput.value = text(user.contract_type) || "none";
+  engagementStatusInput.value = text(user.engagement_status) || convertWorkStatusToEngagementStatus(user.work_status || user.workStatus);
   organizationInput.value = text(user.organization_id);
   departmentInput.value = text(user.department);
   positionInput.value = text(user.position);
   baseAreaInput.value = text(user.base_area);
   statusInput.value = text(user.status) || "active";
-  workStatusInput.value = text(user.work_status || user.workStatus) || "off";
   sortOrderInput.value = text(user.sort_order || user.sortOrder);
   ordercasePermissionInput.value = text(user.ordercase_permission);
   memoInput.value = text(user.memo);
@@ -397,12 +472,15 @@ export function collectUserForm() {
     email: text(emailInput.value),
     phone: text(phoneInput.value),
     role: text(roleInput.value),
+    person_type: text(personTypeInput.value),
+    contract_type: text(contractTypeInput.value),
+    engagement_status: text(engagementStatusInput.value),
+    workStatus: convertEngagementStatusToWorkStatus(engagementStatusInput.value),
     organization_id: text(organizationInput.value),
     department: text(departmentInput.value),
     position: text(positionInput.value),
     base_area: text(baseAreaInput.value),
     status: text(statusInput.value),
-    workStatus: text(workStatusInput.value),
     sortOrder: text(sortOrderInput.value),
     allowed_modules: modules.join(","),
     ordercase_permission: text(ordercasePermissionInput.value),

@@ -7,13 +7,6 @@
   <link rel="stylesheet" href="./css/account-console.css">
 </head>
 <body>
-  <div id="accountConsoleLoadingOverlay" class="loading-overlay show">
-    <div class="loading-card">
-      <div class="loading-spinner"></div>
-      <div id="accountConsoleLoadingText" class="loading-text">初期化中...</div>
-    </div>
-  </div>
-
   <div class="page">
     <header class="header">
       <div>
@@ -43,7 +36,7 @@
     </section>
 
     <section class="toolbar">
-      <input id="searchInput" type="search" placeholder="氏名 / 表示名 / メール / アカウントコード / 人員種別 / 契約区分 / 所属 / エリア / 権限で検索">
+      <input id="searchInput" type="search" placeholder="氏名 / 表示名 / メール / アカウントコード / 所属 / 部署 / 役職 / エリア / 権限で検索">
       <button id="newUserBtn" class="primary-button">アカウント追加</button>
       <button id="reloadBtn" class="secondary-button">再読み込み</button>
     </section>
@@ -78,15 +71,13 @@
                 <th>アカウントコード</th>
                 <th>メール</th>
                 <th>アカウント種別</th>
-                <th>人員種別</th>
-                <th>契約区分</th>
-                <th>稼働対象状態</th>
                 <th>部署</th>
                 <th>役職</th>
                 <th>担当エリア</th>
                 <th>状態</th>
                 <th>利用機能</th>
                 <th>OrderCase</th>
+                <th>ShiftBuilder</th>
               </tr>
             </thead>
             <tbody id="userTableBody"></tbody>
@@ -131,46 +122,19 @@
           <label>
             アカウント種別
             <select id="roleInput">
-              <option value="member">一般アカウント</option>
+              <option value="member">弊社内人員</option>
               <option value="admin">管理者</option>
-            </select>
-          </label>
-
-          <label>
-            人員種別
-            <select id="personTypeInput">
-              <option value="internal">弊社内人員</option>
-              <option value="alliance_individual">アライアンス個人</option>
-              <option value="alliance_company_member">アライアンス法人所属人員</option>
-              <option value="agency">代理店担当者</option>
-            </select>
-          </label>
-          <div class="field-help">実際の所属・立場です。ShiftBuilderや実績管理での扱いに使います。</div>
-
-          <label>
-            契約区分
-            <select id="contractTypeInput">
-              <option value="none">対象外 / 未設定</option>
-              <option value="regular_employee">正社員</option>
-              <option value="contract_employee">契約社員</option>
-              <option value="outsourced">業務委託</option>
-            </select>
-          </label>
-          <div class="field-help">主に弊社内人員向けの契約区分です。有給管理などに使います。</div>
-
-          <label>
-            稼働対象状態
-            <select id="engagementStatusInput">
-              <option value="inactive">稼働対象外</option>
-              <option value="active">稼働対象</option>
+              <option value="dev">開発管理者</option>
+              <option value="partner_individual">アライアンス個人</option>
+              <option value="partner_company_admin">アライアンス法人 管理者</option>
+              <option value="agency">代理店</option>
             </select>
           </label>
 
           <label>
             所属ID / 所属名
-            <input id="organizationInput" type="text" autocomplete="off" placeholder="例：internal / 株式会社〇〇 / ORG-001">
+            <input id="organizationInput" type="text" autocomplete="off" placeholder="例：internal / ORG-001 / 所属名">
           </label>
-          <div id="organizationHelpText" class="field-help"></div>
 
           <label>
             部署
@@ -192,6 +156,14 @@
             <select id="statusInput">
               <option value="active">有効</option>
               <option value="inactive">停止</option>
+            </select>
+          </label>
+
+          <label>
+            稼働対象状態
+            <select id="workStatusInput">
+              <option value="off">稼働対象外</option>
+              <option value="on">稼働対象</option>
             </select>
           </label>
 
@@ -242,6 +214,18 @@
               <option value="edit">登録・編集可能</option>
               <option value="view">閲覧のみ 金額表示あり</option>
               <option value="view_without_amount">閲覧のみ 金額非表示</option>
+            </select>
+          </label>
+
+          <label>
+            ShiftBuilder権限
+            <select id="shiftbuilderPermissionInput">
+              <option value="">なし</option>
+              <option value="all">全管理</option>
+              <option value="manager">確定・公開管理</option>
+              <option value="edit">作成・編集</option>
+              <option value="view">閲覧のみ</option>
+              <option value="self">自分の予定のみ</option>
             </select>
           </label>
 

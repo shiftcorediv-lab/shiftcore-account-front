@@ -15,17 +15,15 @@ import {
   emailInput,
   phoneInput,
   roleInput,
-  personTypeInput,
-  contractTypeInput,
-  engagementStatusInput,
   organizationInput,
-  organizationHelpText,
   departmentInput,
   positionInput,
   baseAreaInput,
   statusInput,
+  workStatusInput,
   sortOrderInput,
   ordercasePermissionInput,
+  shiftbuilderPermissionInput,
   memoInput,
   authProviderText,
   authUidText,
@@ -39,19 +37,19 @@ import {
 
 // ===== 表示ラベル定義ここから =====
 const ROLE_LABELS = {
-  member: "一般アカウント",
-  employee: "一般アカウント",
-  internal: "一般アカウント",
+  member: "弊社内人員",
+  employee: "弊社内人員",
+  internal: "弊社内人員",
   admin: "管理者",
   dev: "開発管理者",
   developer: "開発管理者",
-  partner_individual: "一般アカウント",
-  alliance_individual: "一般アカウント",
-  partner_company: "一般アカウント",
-  partner_company_admin: "管理者",
-  alliance_company: "一般アカウント",
-  alliance_company_admin: "管理者",
-  agency: "一般アカウント"
+  partner_individual: "アライアンス個人",
+  alliance_individual: "アライアンス個人",
+  partner_company: "アライアンス法人",
+  partner_company_admin: "アライアンス法人 管理者",
+  alliance_company: "アライアンス法人",
+  alliance_company_admin: "アライアンス法人 管理者",
+  agency: "代理店"
 };
 
 const STATUS_LABELS = {
@@ -68,25 +66,6 @@ const WORK_STATUS_LABELS = {
   inactive: "稼働対象外",
   available: "稼働対象",
   unavailable: "稼働対象外"
-};
-
-const PERSON_TYPE_LABELS = {
-  internal: "弊社内人員",
-  alliance_individual: "アライアンス個人",
-  alliance_company_member: "アライアンス法人所属人員",
-  agency: "代理店担当者"
-};
-
-const CONTRACT_TYPE_LABELS = {
-  regular_employee: "正社員",
-  contract_employee: "契約社員",
-  outsourced: "業務委託",
-  none: "対象外 / 未設定"
-};
-
-const ENGAGEMENT_STATUS_LABELS = {
-  active: "稼働対象",
-  inactive: "稼働対象外"
 };
 
 const MODULE_LABELS = {
@@ -106,6 +85,14 @@ const ORDERCASE_PERMISSION_LABELS = {
   view_without_amount: "閲覧のみ 金額非表示"
 };
 
+const SHIFTBUILDER_PERMISSION_LABELS = {
+  all: "全管理",
+  manager: "確定・公開管理",
+  edit: "作成・編集",
+  view: "閲覧のみ",
+  self: "自分の予定のみ"
+};
+
 const FIELD_LABELS = {
   internal_user_id: "内部ユーザーID",
   name: "氏名 / 登録名",
@@ -114,9 +101,6 @@ const FIELD_LABELS = {
   email: "メール",
   phone: "電話番号",
   role: "アカウント種別",
-  person_type: "人員種別",
-  contract_type: "契約区分",
-  engagement_status: "稼働対象状態",
   organization_id: "所属ID / 所属名",
   department: "部署",
   position: "役職",
@@ -128,75 +112,12 @@ const FIELD_LABELS = {
   sortOrder: "並び順",
   allowed_modules: "利用可能機能",
   ordercase_permission: "OrderCase権限",
+  shiftbuilder_permission: "ShiftBuilder権限",
   memo: "メモ",
   auth_provider: "認証プロバイダ",
   auth_uid: "認証UID"
 };
 // ===== 表示ラベル定義ここまで =====
-
-
-// ===== ローディング表示ここから =====
-function ensureLoadingOverlay() {
-  let overlay = document.getElementById("accountConsoleLoadingOverlay");
-
-  if (overlay) {
-    return overlay;
-  }
-
-  overlay = document.createElement("div");
-  overlay.id = "accountConsoleLoadingOverlay";
-  overlay.className = "loading-overlay";
-  overlay.innerHTML = `
-    <div class="loading-card">
-      <div class="loading-spinner"></div>
-      <div id="accountConsoleLoadingText" class="loading-text">読み込み中...</div>
-    </div>
-  `;
-
-  document.body.appendChild(overlay);
-  return overlay;
-}
-
-export function showLoading(message = "読み込み中...") {
-  const overlay = ensureLoadingOverlay();
-  const textElement = document.getElementById("accountConsoleLoadingText");
-
-  if (textElement) {
-    textElement.textContent = message;
-  }
-
-  overlay.classList.add("show");
-}
-
-export function hideLoading() {
-  const overlay = document.getElementById("accountConsoleLoadingOverlay");
-
-  if (!overlay) {
-    return;
-  }
-
-  overlay.classList.remove("show");
-}
-
-export function setLogsLoading(isLoading, message = "変更履歴を取得中...") {
-  if (!logsList) {
-    return;
-  }
-
-  if (isLoading) {
-    logsList.classList.add("logs-loading");
-    logsList.innerHTML = `
-      <div class="logs-loading-box">
-        <div class="logs-spinner"></div>
-        <div>${message}</div>
-      </div>
-    `;
-    return;
-  }
-
-  logsList.classList.remove("logs-loading");
-}
-// ===== ローディング表示ここまで =====
 
 
 // ===== 状態表示ここから =====
@@ -227,18 +148,13 @@ export function renderCurrentUserPermission(user) {
 
   const modules = modulesTextForDisplay(user.allowed_modules);
   const ordercasePermission = labelFromMap(user.ordercase_permission, ORDERCASE_PERMISSION_LABELS, "なし");
+  const shiftbuilderPermission = labelFromMap(user.shiftbuilder_permission, SHIFTBUILDER_PERMISSION_LABELS, "なし");
   const role = labelFromMap(user.role, ROLE_LABELS, "-");
-  const personType = labelFromMap(user.person_type || user.personType, PERSON_TYPE_LABELS, "-");
-  const contractType = labelFromMap(user.contract_type || user.contractType, CONTRACT_TYPE_LABELS, "-");
   const status = labelFromMap(user.status, STATUS_LABELS, "-");
-  const engagementStatus = labelFromMap(
-    user.engagement_status || user.engagementStatus || convertWorkStatusToEngagementStatus(user.work_status || user.workStatus),
-    ENGAGEMENT_STATUS_LABELS,
-    "-"
-  );
+  const workStatus = labelFromMap(user.work_status || user.workStatus, WORK_STATUS_LABELS, "-");
 
   currentUserPermissionText.textContent =
-    `アカウント種別：${role} / 人員種別：${personType} / 契約区分：${contractType} / アカウント状態：${status} / 稼働対象状態：${engagementStatus} / 利用可能機能：${modules || "-"} / OrderCase：${ordercasePermission}`;
+    `アカウント種別：${role} / アカウント状態：${status} / 稼働対象状態：${workStatus} / 利用可能機能：${modules || "-"} / OrderCase：${ordercasePermission} / ShiftBuilder：${shiftbuilderPermission}`;
 }
 // ===== 状態表示ここまで =====
 
@@ -271,59 +187,6 @@ function modulesTextForDisplay(value) {
     .join(", ");
 }
 
-function convertWorkStatusToEngagementStatus(value) {
-  const key = text(value).toLowerCase();
-
-  if (key === "on" || key === "active" || key === "available") {
-    return "active";
-  }
-
-  return "inactive";
-}
-
-function convertEngagementStatusToWorkStatus(value) {
-  const key = text(value).toLowerCase();
-
-  if (key === "active") {
-    return "on";
-  }
-
-  return "off";
-}
-
-function normalizeOrganizationByPersonType(personType, organizationId) {
-  if (text(personType) === "internal") {
-    return "internal";
-  }
-
-  return text(organizationId);
-}
-
-export function updateOrganizationHelpState() {
-  const personType = text(personTypeInput.value);
-
-  const helpMap = {
-    internal: "弊社内人員は internal 固定です。変更できません。",
-    alliance_individual: "アライアンス個人は、必要に応じて本人識別用の所属名や管理用IDを入力します。",
-    alliance_company_member: "所属するアライアンス法人名、または法人管理IDを入力します。例：株式会社〇〇 / ORG-001",
-    agency: "所属する代理店名、または代理店IDを入力します。例：〇〇代理店 / AG-001"
-  };
-
-  if (organizationHelpText) {
-    organizationHelpText.textContent = helpMap[personType] || "所属IDまたは所属名を入力します。";
-  }
-
-  if (personType === "internal") {
-    organizationInput.value = "internal";
-    organizationInput.disabled = true;
-    organizationInput.classList.add("locked-input");
-    return;
-  }
-
-  organizationInput.disabled = false;
-  organizationInput.classList.remove("locked-input");
-}
-
 function displayValueByField(field, value) {
   const key = text(field);
   const raw = text(value);
@@ -340,18 +203,6 @@ function displayValueByField(field, value) {
     return labelFromMap(raw, STATUS_LABELS, raw);
   }
 
-  if (key === "person_type") {
-    return labelFromMap(raw, PERSON_TYPE_LABELS, raw);
-  }
-
-  if (key === "contract_type") {
-    return labelFromMap(raw, CONTRACT_TYPE_LABELS, raw);
-  }
-
-  if (key === "engagement_status") {
-    return labelFromMap(raw, ENGAGEMENT_STATUS_LABELS, raw);
-  }
-
   if (key === "work_status" || key === "workStatus") {
     return labelFromMap(raw, WORK_STATUS_LABELS, raw);
   }
@@ -364,6 +215,10 @@ function displayValueByField(field, value) {
     return labelFromMap(raw, ORDERCASE_PERMISSION_LABELS, raw);
   }
 
+  if (key === "shiftbuilder_permission") {
+    return labelFromMap(raw, SHIFTBUILDER_PERMISSION_LABELS, raw);
+  }
+
   return raw;
 }
 
@@ -373,85 +228,6 @@ function makeTd(value) {
   return td;
 }
 // ===== テキスト整形ここまで =====
-
-
-// ===== 保存確認メッセージここから =====
-function getDisplayValue(field, value) {
-  return displayValueByField(field, value) || "-";
-}
-
-function normalizeForCompare(value) {
-  return text(value);
-}
-
-export function buildSaveConfirmMessage(beforeUser, afterUser) {
-  const isUpdate = Boolean(afterUser.internal_user_id);
-  const actionLabel = isUpdate ? "更新" : "新規作成";
-
-  const fields = [
-    ["name", "氏名 / 登録名"],
-    ["display_name", "表示名"],
-    ["employee_code", "アカウントコード"],
-    ["email", "メール"],
-    ["phone", "電話番号"],
-    ["role", "アカウント種別"],
-    ["person_type", "人員種別"],
-    ["contract_type", "契約区分"],
-    ["engagement_status", "稼働対象状態"],
-    ["organization_id", "所属ID / 所属名"],
-    ["department", "部署"],
-    ["position", "役職"],
-    ["base_area", "担当エリア"],
-    ["status", "アカウント状態"],
-    ["allowed_modules", "利用可能機能"],
-    ["ordercase_permission", "OrderCase権限"],
-    ["memo", "メモ"]
-  ];
-
-  const lines = [
-    `この内容でアカウントを${actionLabel}します。`,
-    "",
-    "変更内容："
-  ];
-
-  if (!beforeUser) {
-    fields.forEach(([field, label]) => {
-      const afterValue = getDisplayValue(field, afterUser[field]);
-      lines.push(`・${label}：${afterValue}`);
-    });
-
-    lines.push("");
-    lines.push("問題なければOKを押してください。");
-    return lines.join("\n");
-  }
-
-  const changedLines = [];
-
-  fields.forEach(([field, label]) => {
-    const beforeRaw = beforeUser[field];
-    const afterRaw = afterUser[field];
-
-    if (normalizeForCompare(beforeRaw) === normalizeForCompare(afterRaw)) {
-      return;
-    }
-
-    changedLines.push(
-      `・${label}：${getDisplayValue(field, beforeRaw)} → ${getDisplayValue(field, afterRaw)}`
-    );
-  });
-
-  if (changedLines.length === 0) {
-    lines.push("・変更された項目はありません。");
-  } else {
-    lines.push(...changedLines);
-  }
-
-  lines.push("");
-  lines.push("問題なければOKを押してください。");
-
-  return lines.join("\n");
-}
-// ===== 保存確認メッセージここまで =====
 
 
 // ===== ユーザー絞り込みここから =====
@@ -471,12 +247,6 @@ export function filterUsers(users, keyword) {
       user.phone,
       user.role,
       labelFromMap(user.role, ROLE_LABELS, ""),
-      user.person_type,
-      labelFromMap(user.person_type, PERSON_TYPE_LABELS, ""),
-      user.contract_type,
-      labelFromMap(user.contract_type, CONTRACT_TYPE_LABELS, ""),
-      user.engagement_status,
-      labelFromMap(user.engagement_status, ENGAGEMENT_STATUS_LABELS, ""),
       user.organization_id,
       user.department,
       user.position,
@@ -490,6 +260,8 @@ export function filterUsers(users, keyword) {
       modulesTextForDisplay(user.allowed_modules),
       user.ordercase_permission,
       labelFromMap(user.ordercase_permission, ORDERCASE_PERMISSION_LABELS, ""),
+      user.shiftbuilder_permission,
+      labelFromMap(user.shiftbuilder_permission, SHIFTBUILDER_PERMISSION_LABELS, ""),
       user.memo
     ].map((value) => text(value).toLowerCase()).join(" ");
 
@@ -506,7 +278,7 @@ export function renderUsers(users, selectedUserId, onSelectUser) {
   if (!users.length) {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
-    td.colSpan = 14;
+    td.colSpan = 12;
     td.textContent = "表示できるアカウントがありません";
     tr.appendChild(td);
     userTableBody.appendChild(tr);
@@ -525,9 +297,6 @@ export function renderUsers(users, selectedUserId, onSelectUser) {
     tr.appendChild(makeTd(user.employee_code));
     tr.appendChild(makeTd(user.email));
     tr.appendChild(makeTd(labelFromMap(user.role, ROLE_LABELS, "-")));
-    tr.appendChild(makeTd(labelFromMap(user.person_type, PERSON_TYPE_LABELS, "-")));
-    tr.appendChild(makeTd(labelFromMap(user.contract_type, CONTRACT_TYPE_LABELS, "-")));
-    tr.appendChild(makeTd(labelFromMap(user.engagement_status, ENGAGEMENT_STATUS_LABELS, "-")));
     tr.appendChild(makeTd(user.department));
     tr.appendChild(makeTd(user.position));
     tr.appendChild(makeTd(user.base_area));
@@ -541,6 +310,7 @@ export function renderUsers(users, selectedUserId, onSelectUser) {
 
     tr.appendChild(makeTd(modulesTextForDisplay(user.allowed_modules)));
     tr.appendChild(makeTd(labelFromMap(user.ordercase_permission, ORDERCASE_PERMISSION_LABELS, "なし")));
+    tr.appendChild(makeTd(labelFromMap(user.shiftbuilder_permission, SHIFTBUILDER_PERMISSION_LABELS, "なし")));
 
     tr.addEventListener("click", () => onSelectUser(user));
     userTableBody.appendChild(tr);
@@ -574,17 +344,15 @@ export function clearUserForm() {
   emailInput.value = "";
   phoneInput.value = "";
   roleInput.value = "member";
-  personTypeInput.value = "internal";
-  contractTypeInput.value = "none";
-  engagementStatusInput.value = "inactive";
-  organizationInput.value = "internal";
-updateOrganizationHelpState();
+  organizationInput.value = "";
   departmentInput.value = "";
   positionInput.value = "";
   baseAreaInput.value = "";
   statusInput.value = "active";
+  workStatusInput.value = "off";
   sortOrderInput.value = "";
   ordercasePermissionInput.value = "";
+  shiftbuilderPermissionInput.value = "";
   memoInput.value = "";
 
   document.querySelectorAll("input[name='module']").forEach((checkbox) => {
@@ -609,17 +377,15 @@ export function fillUserForm(user) {
   emailInput.value = text(user.email);
   phoneInput.value = text(user.phone);
   roleInput.value = text(user.role) || "member";
-  personTypeInput.value = text(user.person_type) || "internal";
-  contractTypeInput.value = text(user.contract_type) || "none";
-  engagementStatusInput.value = text(user.engagement_status) || convertWorkStatusToEngagementStatus(user.work_status || user.workStatus);
   organizationInput.value = text(user.organization_id);
-  updateOrganizationHelpState();
   departmentInput.value = text(user.department);
   positionInput.value = text(user.position);
   baseAreaInput.value = text(user.base_area);
   statusInput.value = text(user.status) || "active";
+  workStatusInput.value = text(user.work_status || user.workStatus) || "off";
   sortOrderInput.value = text(user.sort_order || user.sortOrder);
   ordercasePermissionInput.value = text(user.ordercase_permission);
+  shiftbuilderPermissionInput.value = text(user.shiftbuilder_permission);
   memoInput.value = text(user.memo);
 
   const modules = modulesArray(user.allowed_modules);
@@ -639,12 +405,6 @@ export function collectUserForm() {
   const modules = Array.from(document.querySelectorAll("input[name='module']:checked"))
     .map((checkbox) => checkbox.value);
 
-const selectedPersonType = text(personTypeInput.value);
-const normalizedOrganizationId = normalizeOrganizationByPersonType(
-  selectedPersonType,
-  organizationInput.value
-);
-  
   return {
     internal_user_id: text(internalUserIdInput.value),
     name: text(nameInput.value),
@@ -653,18 +413,16 @@ const normalizedOrganizationId = normalizeOrganizationByPersonType(
     email: text(emailInput.value),
     phone: text(phoneInput.value),
     role: text(roleInput.value),
-    person_type: selectedPersonType,
-    contract_type: text(contractTypeInput.value),
-    engagement_status: text(engagementStatusInput.value),
-    workStatus: convertEngagementStatusToWorkStatus(engagementStatusInput.value),
-    organization_id: normalizedOrganizationId,
+    organization_id: text(organizationInput.value),
     department: text(departmentInput.value),
     position: text(positionInput.value),
     base_area: text(baseAreaInput.value),
     status: text(statusInput.value),
+    workStatus: text(workStatusInput.value),
     sortOrder: text(sortOrderInput.value),
     allowed_modules: modules.join(","),
     ordercase_permission: text(ordercasePermissionInput.value),
+    shiftbuilder_permission: text(shiftbuilderPermissionInput.value),
     memo: text(memoInput.value)
   };
 }
@@ -673,7 +431,6 @@ const normalizedOrganizationId = normalizeOrganizationByPersonType(
 
 // ===== 変更履歴描画ここから =====
 export function renderLogs(logs) {
-  logsList.classList.remove("logs-loading");
   logsList.innerHTML = "";
 
   if (!logs.length) {
@@ -710,10 +467,3 @@ export function renderLogs(logs) {
   });
 }
 // ===== 変更履歴描画ここまで =====
-
-// ===== 人員種別変更イベント設定ここから =====
-if (personTypeInput) {
-  personTypeInput.addEventListener("change", updateOrganizationHelpState);
-  updateOrganizationHelpState();
-}
-// ===== 人員種別変更イベント設定ここまで =====

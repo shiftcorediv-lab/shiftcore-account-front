@@ -492,3 +492,26 @@ export function buildSaveConfirmMessage(user) {
   ].join("\n");
 }
 // ===== 保存確認メッセージここまで =====
+
+// ===== ローディング表示ここから =====
+export function showLoading(message = "読み込み中...") {
+  if (!statusBox) {
+    return;
+  }
+
+  statusBox.textContent = message;
+  statusBox.classList.add("loading");
+}
+
+export function hideLoading(message = "") {
+  if (!statusBox) {
+    return;
+  }
+
+  statusBox.classList.remove("loading");
+
+  if (message) {
+    statusBox.textContent = message;
+  }
+}
+// ===== ローディング表示ここまで =====

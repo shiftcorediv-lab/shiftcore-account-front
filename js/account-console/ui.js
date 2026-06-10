@@ -507,7 +507,7 @@ function ensureLoadingOverlay() {
   loadingOverlayEl.innerHTML = `
     <div class="loading-card">
       <div class="loading-spinner" aria-hidden="true"></div>
-      <div class="loading-message">読み込み中...</div>
+      <div class="loading-text">読み込み中...</div>
     </div>
   `;
 
@@ -517,7 +517,7 @@ function ensureLoadingOverlay() {
 
 export function showLoading(message = "読み込み中...") {
   const overlay = ensureLoadingOverlay();
-  const messageEl = overlay.querySelector(".loading-message");
+  const messageEl = overlay.querySelector(".loading-text");
 
   if (messageEl) {
     messageEl.textContent = message;

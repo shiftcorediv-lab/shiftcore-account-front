@@ -494,24 +494,54 @@ export function buildSaveConfirmMessage(user) {
 // ===== 保存確認メッセージここまで =====
 
 // ===== ローディング表示ここから =====
-export function showLoading(message = "読み込み中...") {
-  if (!statusBox) {
-    return;
+let loadingOverlayEl = null;
+
+function ensureLoadingOverlay() {
+  if (loadingOverlayEl) {
+    return loadingOverlayEl;
   }
 
-  statusBox.textContent = message;
-  statusBox.classList.add("loading");
+  loadingOverlayEl = document.createElement("div");
+  loadingOverlayEl.id = "loadingOverlay";
+  loadingOverlayEl.className = "loading-overlay";
+  loadingOverlayEl.innerHTML = `
+    <div class="loading-card">
+      <div class="loading-spinner" aria-hidden="true"></div>
+      <div class="loading-message">読み込み中...</div>
+    </div>
+  `;
+
+  document.body.appendChild(loadingOverlayEl);
+  return loadingOverlayEl;
+}
+
+export function showLoading(message = "読み込み中...") {
+  const overlay = ensureLoadingOverlay();
+  const messageEl = overlay.querySelector(".loading-message");
+
+  if (messageEl) {
+    messageEl.textContent = message;
+  }
+
+  overlay.classList.add("show");
+
+  if (statusBox) {
+    statusBox.textContent = message;
+    statusBox.classList.add("loading");
+  }
 }
 
 export function hideLoading(message = "") {
-  if (!statusBox) {
-    return;
-  }
+  const overlay = ensureLoadingOverlay();
 
-  statusBox.classList.remove("loading");
+  overlay.classList.remove("show");
 
-  if (message) {
-    statusBox.textContent = message;
+  if (statusBox) {
+    statusBox.classList.remove("loading");
+
+    if (message) {
+      statusBox.textContent = message;
+    }
   }
 }
 // ===== ローディング表示ここまで =====

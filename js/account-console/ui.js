@@ -467,3 +467,28 @@ export function renderLogs(logs) {
   });
 }
 // ===== 変更履歴描画ここまで =====
+
+// ===== 保存確認メッセージここから =====
+export function buildSaveConfirmMessage(user) {
+  const name = user?.name || user?.display_name || "このアカウント";
+  const email = user?.email || "-";
+  const employeeCode = user?.employee_code || user?.employeeCode || "-";
+
+  const allowedModules = user?.allowed_modules || "-";
+  const ordercasePermission = user?.ordercase_permission || "なし";
+  const shiftbuilderPermission = user?.shiftbuilder_permission || "なし";
+
+  return [
+    "以下の内容で保存します。",
+    "",
+    `氏名：${name}`,
+    `メール：${email}`,
+    `アカウントコード：${employeeCode}`,
+    `利用可能機能：${allowedModules}`,
+    `OrderCase権限：${ordercasePermission}`,
+    `ShiftBuilder権限：${shiftbuilderPermission}`,
+    "",
+    "保存してよろしいですか？"
+  ].join("\n");
+}
+// ===== 保存確認メッセージここまで =====

@@ -547,11 +547,22 @@ export function hideLoading(message = "") {
 // ===== ローディング表示ここまで =====
 
 // ===== 変更履歴ローディング表示ここから =====
-export function setLogsLoading(message = "変更履歴を読み込み中...") {
+export function setLogsLoading(isLoading, message = "変更履歴を読み込み中...") {
   if (!logsList) {
     return;
   }
 
-  logsList.textContent = message;
+  if (isLoading) {
+    logsList.classList.add("logs-loading");
+    logsList.innerHTML = `
+      <div class="logs-loading-box">
+        <div class="logs-spinner" aria-hidden="true"></div>
+        <div>${message}</div>
+      </div>
+    `;
+    return;
+  }
+
+  logsList.classList.remove("logs-loading");
 }
 // ===== 変更履歴ローディング表示ここまで =====

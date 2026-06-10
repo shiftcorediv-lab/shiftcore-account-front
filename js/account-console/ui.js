@@ -1,4 +1,3 @@
-
 import {
   operatorText,
   permissionBadge,
@@ -516,3 +515,13 @@ export function hideLoading(message = "") {
   }
 }
 // ===== ローディング表示ここまで =====
+
+// ===== 変更履歴ローディング表示ここから =====
+export function setLogsLoading(message = "変更履歴を読み込み中...") {
+  if (!logsList) {
+    return;
+  }
+
+  logsList.textContent = message;
+}
+// ===== 変更履歴ローディング表示ここまで =====

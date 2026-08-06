@@ -3,8 +3,25 @@ import { DASHBOARD_URL, SIGNUP_REQUEST_URL } from "./config.js";
 import { resolveCurrentUserWithGasByIdToken } from "./api.js?v=20260806-idtoken-1";
 import { saveLoginSession, clearLoginSession, saveSignupEmail, clearSignupEmail } from "./storage.js";
 import { setStatus, showLoggedOutState } from "./ui.js";
+import { getPostLoginUrl } from "./redirect.js?v=20260806-login-return-1";
+
+let verificationPromise = null;
 
 export async function verifySignedInUser(user) {
+  if (verificationPromise) {
+    return verificationPromise;
+  }
+
+  verificationPromise = verifySignedInUser_(user);
+
+  try {
+    return await verificationPromise;
+  } finally {
+    verificationPromise = null;
+  }
+}
+
+async function verifySignedInUser_(user) {
   if (!user || !user.email) {
     clearLoginSession();
     clearSignupEmail();
@@ -21,7 +38,7 @@ export async function verifySignedInUser(user) {
     if (loginCheck.ok) {
       clearSignupEmail();
       saveLoginSession(loginCheck);
-      window.location.href = DASHBOARD_URL;
+      window.location.href = getPostLoginUrl();
       return;
     }
 
